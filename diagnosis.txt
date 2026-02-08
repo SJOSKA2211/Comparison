@@ -1,0 +1,4 @@
+Python: 3.13.0 (main, Feb  8 2026, 09:25:54) [GCC 15.2.1 20260103]
+Executable: /home/kamau/.pyenv/versions/3.13.0/bin/python3
+FastAPI: Installed
+Uvicorn: Installed

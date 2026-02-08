@@ -7,8 +7,6 @@ from __future__ import annotations
 
 import logging
 import os
-import sys
-import time
 from dataclasses import dataclass
 from typing import Any
 
@@ -154,7 +152,7 @@ def create_pricing_task():
         
         return results
     
-    return batch_price_task
+    return batch_price_options
 
 
 def create_training_task():

@@ -227,9 +227,10 @@ async def lifespan(app: FastAPI):
     await get_db_pool()
     yield
     global _db_pool
-    if _db_pool:
-        await _db_pool.close()
-
+    
+    # Close SQLAlchemy engine
+    from src.database import engine
+    await engine.dispose()
 
 # =============================================================================
 # Application
@@ -242,6 +243,9 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
     lifespan=lifespan,
 )
+
+from src.api.routers.trading import router as trading_router
+app.include_router(trading_router)
 
 app.add_middleware(
     CORSMiddleware,

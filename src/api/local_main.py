@@ -6,18 +6,35 @@ Simplified version using SQLite for local development
 from __future__ import annotations
 
 import os
-import secrets
-import time
-from contextlib import asynccontextmanager
-from typing import Any
+import sys
+import traceback
 
-import structlog
-from fastapi import Depends, FastAPI, HTTPException, Request, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import ORJSONResponse
-from pydantic import BaseModel, EmailStr, Field
+# Startup diagnostics
+try:
+    with open("startup.log", "w") as f:
+        f.write("Starting local_main...\n")
+except:
+    pass
+
+try:
+    import secrets
+    import time
+    from contextlib import asynccontextmanager
+    from typing import Any
+
+    import structlog
+    from fastapi import Depends, FastAPI, HTTPException, Request, status
+    from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.responses import ORJSONResponse
+    from pydantic import BaseModel, EmailStr, Field
+except Exception as e:
+    with open("startup_error.log", "w") as f:
+        f.write(f"Import Error: {e}\n{traceback.format_exc()}")
+    sys.exit(1)
 
 logger = structlog.get_logger()
+with open("startup.log", "a") as f:
+    f.write("Imports successful\n") 
 
 # =============================================================================
 # Configuration

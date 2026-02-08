@@ -1,0 +1,4 @@
+Health Check: 200 {'status': 'healthy', 'environment': 'development', 'version': '1.0.0-dev'}
+User already exists
+Auth: 200
+Pricing: 200 10.450583572185565

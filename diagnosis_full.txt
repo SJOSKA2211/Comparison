@@ -1,0 +1,6 @@
+pydantic: Installed
+pydantic_settings: Installed
+aiosqlite: Installed
+structlog: Installed
+numpy: Installed
+scipy: Installed

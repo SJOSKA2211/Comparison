@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function OrderForm({ user, onLogin }) {
+export default function OrderForm({ user, onLogin, portfolio, onOrderPlaced }) {
     const [mode, setMode] = useState(user ? 'order' : 'login')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -25,6 +25,47 @@ export default function OrderForm({ user, onLogin }) {
             setMode('order')
         }
         setLoading(false)
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        if (!portfolio) {
+            setError('Please selecyt a portfolio')
+            return
+        }
+        setLoading(true)
+        setError('')
+
+        try {
+            const token = localStorage.getItem('token')
+            const res = await fetch('/api/trading/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    portfolio_id: portfolio.id,
+                    symbol: 'AAPL', // Hardcoded for now, should come from active symbol
+                    side: side.toUpperCase(),
+                    order_type: orderType,
+                    quantity: quantity,
+                    price: orderType === 'market' ? null : parseFloat(limitPrice)
+                })
+            })
+
+            if (!res.ok) {
+                const errData = await res.json()
+                throw new Error(errData.detail || 'Order failed')
+            }
+
+            if (onOrderPlaced) onOrderPlaced()
+            alert('Order placed successfully!')
+        } catch (e) {
+            setError(e.message)
+        } finally {
+            setLoading(false)
+        }
     }
 
     if (!user && mode !== 'order') {
@@ -226,11 +267,14 @@ export default function OrderForm({ user, onLogin }) {
 
                     {/* Submit */}
                     <button
+                        onClick={handleSubmit}
+                        disabled={loading || !portfolio}
                         className={`btn w-full ${side === 'buy' ? 'btn--primary' : 'btn--danger'}`}
                         style={{ padding: 'var(--space-md)' }}
                     >
-                        {side === 'buy' ? 'BUY' : 'SELL'} {quantity} Contracts
+                        {loading ? 'Processing...' : `${side.toUpperCase()} ${quantity} Contracts`}
                     </button>
+                    {error && <div style={{ color: 'var(--bearish)', fontSize: '0.75rem', marginTop: 'var(--space-sm)' }}>{error}</div>}
                 </div>
             </div>
 
@@ -240,15 +284,15 @@ export default function OrderForm({ user, onLogin }) {
                     <div className="flex flex-col gap-sm">
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
                             <span className="text-muted">Buying Power</span>
-                            <span className="mono text-bullish">$124,500.00</span>
+                            <span className="mono text-bullish">${(portfolio?.cash_balance || 0).toLocaleString()}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                            <span className="text-muted">Day P&L</span>
-                            <span className="mono text-bullish">+$1,234.56</span>
+                            <span className="text-muted">Portfolio</span>
+                            <span className="mono">{portfolio?.name || '—'}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
                             <span className="text-muted">Open Positions</span>
-                            <span className="mono">5</span>
+                            <span className="mono">{portfolio?.positions?.length || 0}</span>
                         </div>
                     </div>
                 </div>

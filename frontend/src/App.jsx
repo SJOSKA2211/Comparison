@@ -10,7 +10,22 @@ const API_URL = '/api'
 
 export default function App() {
     const [user, setUser] = useState(null)
+    const [portfolios, setPortfolios] = useState([])
+    const [activePortfolio, setActivePortfolio] = useState(null)
     const [activeTab, setActiveTab] = useState('pricing')
+
+    const fetchPortfolios = useCallback(async (token) => {
+        try {
+            const res = await fetch(`${API_URL}/trading/portfolios`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            if (res.ok) {
+                const data = await res.json()
+                setPortfolios(data)
+                if (data.length > 0) setActivePortfolio(data[0])
+            }
+        } catch (e) { console.error(e) }
+    }, [])
 
     const handleLogin = useCallback(async (email, password) => {
         try {
@@ -23,6 +38,7 @@ export default function App() {
                 const data = await res.json()
                 localStorage.setItem('token', data.access_token)
                 setUser(data.user)
+                await fetchPortfolios(data.access_token)
                 return { success: true }
             }
             return { success: false, error: 'Invalid credentials' }
@@ -44,7 +60,12 @@ export default function App() {
 
             <main className="terminal__main">
                 {activeTab === 'pricing' && <PricingPanel />}
-                {activeTab === 'positions' && <PositionsTable />}
+                {activeTab === 'positions' && (
+                    <PositionsTable
+                        portfolio={activePortfolio}
+                        onUpdate={() => fetchPortfolios(localStorage.getItem('token'))}
+                    />
+                )}
                 {activeTab === 'research' && (
                     <div className="card">
                         <div className="card__header">
@@ -58,7 +79,12 @@ export default function App() {
             </main>
 
             <aside className="terminal__panel">
-                <OrderForm onLogin={handleLogin} user={user} />
+                <OrderForm
+                    onLogin={handleLogin}
+                    user={user}
+                    portfolio={activePortfolio}
+                    onOrderPlaced={() => fetchPortfolios(localStorage.getItem('token'))}
+                />
             </aside>
 
             <Footer />

@@ -1,13 +1,6 @@
-const positions = [
-    { id: 1, symbol: 'AAPL', type: 'CALL', strike: 185, expiry: '2024-03-15', qty: 10, avgPrice: 8.45, currentPrice: 10.20, pnl: 175.00, pnlPct: 20.7 },
-    { id: 2, symbol: 'GOOGL', type: 'PUT', strike: 145, expiry: '2024-03-22', qty: -5, avgPrice: 4.20, currentPrice: 3.80, pnl: 20.00, pnlPct: 9.5 },
-    { id: 3, symbol: 'MSFT', type: 'CALL', strike: 410, expiry: '2024-04-19', qty: 15, avgPrice: 12.30, currentPrice: 11.85, pnl: -67.50, pnlPct: -3.7 },
-    { id: 4, symbol: 'SAFCOM', type: 'CALL', strike: 25, expiry: '2024-06-21', qty: 50, avgPrice: 1.20, currentPrice: 1.45, pnl: 125.00, pnlPct: 20.8 },
-    { id: 5, symbol: 'EQTY', type: 'PUT', strike: 45, expiry: '2024-05-17', qty: 20, avgPrice: 2.10, currentPrice: 2.05, pnl: -10.00, pnlPct: -2.4 },
-]
-
-export default function PositionsTable() {
-    const totalPnl = positions.reduce((sum, p) => sum + p.pnl, 0)
+export default function PositionsTable({ portfolio, onUpdate }) {
+    const positions = portfolio?.positions || []
+    const totalPnl = positions.reduce((sum, pos) => sum + (pos.current_price - pos.average_price) * pos.quantity * 100, 0)
 
     return (
         <div className="flex flex-col gap-lg">
@@ -40,7 +33,8 @@ export default function PositionsTable() {
                                 <th>Qty</th>
                                 <th>Avg Price</th>
                                 <th>Current</th>
-                                <th>P&L</th>
+                                <th>P&L ($)</th>
+                                <th>P&L (%)</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -63,20 +57,16 @@ export default function PositionsTable() {
                                     </td>
                                     <td>${pos.strike}</td>
                                     <td>{pos.expiry}</td>
-                                    <td style={{ color: pos.qty < 0 ? 'var(--bearish)' : 'var(--pearl)' }}>
-                                        {pos.qty}
+                                    <td style={{ color: pos.quantity < 0 ? 'var(--bearish)' : 'var(--pearl)' }}>
+                                        {pos.quantity}
                                     </td>
-                                    <td>${pos.avgPrice.toFixed(2)}</td>
-                                    <td>${pos.currentPrice.toFixed(2)}</td>
-                                    <td>
-                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                            <span className={pos.pnl >= 0 ? 'text-bullish' : 'text-bearish'}>
-                                                {pos.pnl >= 0 ? '+' : ''}${pos.pnl.toFixed(2)}
-                                            </span>
-                                            <span style={{ fontSize: '0.625rem', color: pos.pnl >= 0 ? 'var(--bullish)' : 'var(--bearish)' }}>
-                                                {pos.pnl >= 0 ? '+' : ''}{pos.pnlPct.toFixed(1)}%
-                                            </span>
-                                        </div>
+                                    <td className="mono">${pos.average_price.toFixed(2)}</td>
+                                    <td className="mono">${pos.current_price.toFixed(2)}</td>
+                                    <td className={`mono ${pos.current_price >= pos.average_price ? 'text-bullish' : 'text-bearish'}`}>
+                                        {((pos.current_price - pos.average_price) * pos.quantity * 100) >= 0 ? '+' : ''}{((pos.current_price - pos.average_price) * pos.quantity * 100).toFixed(2)}
+                                    </td>
+                                    <td className={`mono ${pos.current_price >= pos.average_price ? 'text-bullish' : 'text-bearish'}`}>
+                                        {(((pos.current_price - pos.average_price) / pos.average_price) * 100) >= 0 ? '+' : ''}{(((pos.current_price - pos.average_price) / pos.average_price) * 100).toFixed(1)}%
                                     </td>
                                     <td>
                                         <div className="flex gap-xs">

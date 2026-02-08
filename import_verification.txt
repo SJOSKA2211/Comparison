@@ -1,0 +1,6 @@
+src.database: OK
+src.api.main: OK
+src.api.routers.trading: OK
+src.pricing.numerical_methods: OK
+src.models.market: OK
+src.ml.feature_engineering: OK

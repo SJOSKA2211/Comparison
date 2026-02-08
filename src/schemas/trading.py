@@ -10,6 +10,7 @@ class PositionResponse(BaseModel):
     symbol: str
     quantity: float
     average_price: float
+    current_price: Optional[float] = None
     created_at: datetime
     updated_at: datetime
 

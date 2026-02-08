@@ -1,27 +1,28 @@
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from src.database import get_db
 from src.models.trading import Portfolio, Position, Order, Watchlist, OrderStatus
+from src.models.market import MarketTick
 from src.schemas.trading import (
     PortfolioCreate, PortfolioResponse, 
     OrderCreate, OrderResponse, 
     WatchlistCreate, WatchlistUpdate, WatchlistResponse,
     PositionResponse
 )
-from src.api.main import get_current_user
+from src.api.deps import require_auth, get_db
+# Remove local get_current_user_id and use dependency directly in endpoints if possible,
+# or keep a wrapper that returns UUID.
 
 router = APIRouter(prefix="/trading", tags=["Trading"])
 
 # Dependency to get current user ID
-async def get_current_user_id(user: dict = Depends(get_current_user)) -> UUID:
-    if not user:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    return UUID(str(user["user_id"]))
+async def get_current_user_id(user: dict = Depends(require_auth)) -> UUID:
+    return user["user_id"]
 
 # =============================================================================
 # Portfolios
@@ -58,17 +59,28 @@ async def get_portfolios(
 @router.get("/portfolios/{portfolio_id}", response_model=PortfolioResponse)
 async def get_portfolio(
     portfolio_id: UUID,
-    user_id: UUID = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db)
 ):
     result = await db.execute(
         select(Portfolio)
-        .where(Portfolio.id == portfolio_id, Portfolio.user_id == user_id)
+        .where(Portfolio.id == portfolio_id)
         .options(selectinload(Portfolio.positions))
     )
     portfolio = result.scalars().first()
     if not portfolio:
         raise HTTPException(status_code=404, detail="Portfolio not found")
+    
+    # Feature Upgrade: Fetch latest prices for positions
+    for pos in portfolio.positions:
+        tick_result = await db.execute(
+            select(MarketTick.price)
+            .where(MarketTick.symbol == pos.symbol)
+            .order_by(MarketTick.time.desc())
+            .limit(1)
+        )
+        latest_price = tick_result.scalar()
+        setattr(pos, "current_price", latest_price or pos.average_price)
+        
     return portfolio
 
 # =============================================================================

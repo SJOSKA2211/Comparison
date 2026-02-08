@@ -1,0 +1,49 @@
+# BS-Opt ML Requirements
+# Machine Learning & Quantitative Finance Stack
+
+# Include base requirements
+-r base.txt
+
+# Deep Learning
+torch==2.2.0
+torchvision==0.17.0
+
+# Distributed ML
+ray[default]==2.9.2
+ray[rllib]==2.9.2
+
+# NLP & Transformers
+transformers==4.37.2
+tokenizers==0.15.1
+sentence-transformers==2.3.1
+
+# Time Series & Finance
+pandas==2.2.0
+numpy==1.26.3
+scipy==1.12.0
+scikit-learn==1.4.0
+statsmodels==0.14.1
+
+# Quantitative Finance
+quantlib==1.33
+py-vollib==1.0.1
+
+# Visualization (for notebooks)
+matplotlib==3.8.2
+plotly==5.18.0
+seaborn==0.13.2
+
+# Jupyter Integration
+jupyterlab==4.0.12
+ipykernel==6.29.0
+
+# Model Registry
+mlflow==2.10.2
+
+# Data Scraping
+playwright==1.41.2
+beautifulsoup4==4.12.3
+lxml==5.1.0
+
+# Async utilities
+nest-asyncio==1.6.0

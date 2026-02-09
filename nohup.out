@@ -1,0 +1,1 @@
+./start_frontend.sh: line 5: 186399 Hangup                     npm run dev -- --port 3000 --host 0.0.0.0 >> ../frontend_startup.log 2>&1

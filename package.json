@@ -1,0 +1,1 @@
+{"name":"comparison","version":"1.0.0","description":"Bs","scripts":{"build":"echo 'Building...'","test":"echo 'Testing...'"}}

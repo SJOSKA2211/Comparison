@@ -27,6 +27,7 @@ try:
     from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import ORJSONResponse
     from pydantic import BaseModel, EmailStr, Field
+    from passlib.context import CryptContext
 except Exception as e:
     with open("startup_error.log", "w") as f:
         f.write(f"Import Error: {e}\n{traceback.format_exc()}")
@@ -35,6 +36,9 @@ except Exception as e:
 logger = structlog.get_logger()
 with open("startup.log", "a") as f:
     f.write("Imports successful\n") 
+
+# Password hashing context
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # =============================================================================
 # Configuration
@@ -199,10 +203,8 @@ async def readiness_check(db=Depends(get_db)):
 @app.post("/auth/register", response_model=TokenResponse, tags=["Auth"])
 async def register_user(user: UserCreate, db=Depends(get_db)):
     """Register with email/password"""
-    import hashlib
-    
-    # Simple password hash for dev
-    password_hash = hashlib.sha256(user.password.encode()).hexdigest()
+    # Secure password hash using bcrypt
+    password_hash = pwd_context.hash(user.password)
     user_id = secrets.token_hex(16)
     
     try:
@@ -234,17 +236,14 @@ async def register_user(user: UserCreate, db=Depends(get_db)):
 @app.post("/auth/login", response_model=TokenResponse, tags=["Auth"])
 async def login(credentials: LoginRequest, db=Depends(get_db)):
     """Login with email/password"""
-    import hashlib
-    
-    password_hash = hashlib.sha256(credentials.password.encode()).hexdigest()
     
     cursor = await db.execute(
-        "SELECT id, email, role, email_verified FROM users WHERE email = ? AND password_hash = ?",
-        (credentials.email, password_hash)
+        "SELECT id, email, role, email_verified, password_hash FROM users WHERE email = ?",
+        (credentials.email,)
     )
     row = await cursor.fetchone()
     
-    if not row:
+    if not row or not pwd_context.verify(credentials.password, row["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Create session

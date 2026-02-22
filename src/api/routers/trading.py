@@ -6,7 +6,7 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from src.database import get_db
-from src.models.trading import Portfolio, Position, Order, Watchlist, OrderStatus
+from src.models.trading import Portfolio, Position, Order, Watchlist, OrderStatus, OrderSide
 from src.models.market import MarketTick
 from src.schemas.trading import (
     PortfolioCreate, PortfolioResponse, 
@@ -102,7 +102,22 @@ async def create_order(
         raise HTTPException(status_code=404, detail="Portfolio not found")
 
     # TODO: Validate balance for BUY orders
-    # TODO: Validate position for SELL orders
+
+    # Validate position for SELL orders
+    if order.side == OrderSide.SELL:
+        position_result = await db.execute(
+            select(Position).where(
+                Position.portfolio_id == order.portfolio_id,
+                Position.symbol == order.symbol
+            )
+        )
+        position = position_result.scalars().first()
+
+        if not position or position.quantity < order.quantity:
+             raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Insufficient position for symbol {order.symbol}"
+            )
 
     new_order = Order(
         portfolio_id=order.portfolio_id,

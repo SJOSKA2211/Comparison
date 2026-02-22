@@ -1,7 +1,7 @@
+# pylint: disable=wrong-import-position, wrong-import-order
 import pytest_asyncio
 import pytest
 import uuid
-import sys
 from datetime import datetime, timedelta, timezone
 
 # Patch UUID for SQLite compatibility
@@ -9,17 +9,17 @@ import sqlalchemy.dialects.postgresql
 from sqlalchemy import Uuid
 sqlalchemy.dialects.postgresql.UUID = Uuid
 
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from src.database import Base
-from src.models.trading import Portfolio, Position
-from src.models.market import MarketTick
-from src.api.routers.trading import get_portfolio
-import os
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker # noqa: E402
+from src.database import Base # noqa: E402
+from src.models.trading import Portfolio, Position # noqa: E402
+from src.models.market import MarketTick # noqa: E402
+from src.api.routers.trading import get_portfolio # noqa: E402
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 @pytest_asyncio.fixture
 async def db_session():
+    """Create async db session for testing"""
     engine = create_async_engine(TEST_DATABASE_URL, echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -31,7 +31,8 @@ async def db_session():
     await engine.dispose()
 
 @pytest.mark.asyncio
-async def test_get_portfolio_prices_implementation(db_session):
+async def test_get_portfolio_prices_implementation(db_session): # pylint: disable=redefined-outer-name
+    """Test optimized price fetching logic"""
     # Setup data
     user_id = uuid.uuid4()
     portfolio = Portfolio(user_id=user_id, name="Test Portfolio")

@@ -187,8 +187,9 @@ def create_training_task():
 
 async def consume_market_data():
     """Consume market data from Kafka and trigger ML predictions"""
-    from aiokafka import AIOKafkaConsumer
     import json
+
+    from aiokafka import AIOKafkaConsumer
 
     consumer = AIOKafkaConsumer(
         "market-ticks",

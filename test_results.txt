@@ -59,6 +59,6 @@ tests/test_feature_engineering.py:6
     import pandas as pd
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-======================== 39 passed, 1 warning in 2.72s =========================
+======================== 39 passed, 1 warning in 2.77s =========================
 
 Tests finished with exit code 0

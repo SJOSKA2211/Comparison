@@ -13,14 +13,13 @@ import traceback
 try:
     with open("startup.log", "w") as f:
         f.write("Starting local_main...\n")
-except:
+except Exception:
     pass
 
 try:
     import secrets
     import time
     from contextlib import asynccontextmanager
-    from typing import Any  # noqa: F401
 
     import structlog
     from fastapi import Depends, FastAPI, HTTPException, Request, status

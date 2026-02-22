@@ -4,14 +4,13 @@ Includes Black-Scholes (analytical), Crank-Nicolson (FDM),
 Monte Carlo, and Trinomial Trees.
 """
 
-import time
 import math
-from typing import Literal, Optional
+import time
 from dataclasses import dataclass
+from typing import Literal, Optional
 
 import numpy as np
 from scipy.stats import norm
-
 
 # =============================================================================
 # Black-Scholes Analytical Formula

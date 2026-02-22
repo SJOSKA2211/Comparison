@@ -4,6 +4,7 @@ Includes technical indicators and signal generation.
 """
 
 from typing import List, Optional  # noqa: F401
+
 import numpy as np
 import pandas as pd
 

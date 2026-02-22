@@ -9,7 +9,8 @@ from urllib.parse import urlencode
 import pytest
 from pydantic import ValidationError
 
-from src.api.main import PricingRequest, UserCreate
+from src.api.routers.pricing import PricingRequest
+from src.schemas.auth import UserCreate
 
 
 # =============================================================================

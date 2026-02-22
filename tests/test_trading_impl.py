@@ -21,6 +21,17 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 async def db_session():
     """Create async db session for testing"""
     engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+
+    # Configure SQLite dialect to handle UUID
+    from sqlalchemy.dialects.sqlite import dialect as sqlite_dialect
+    # Add a custom compilation rule for UUID if visit_uuid is missing
+    if not hasattr(sqlite_dialect, 'visit_uuid'):
+        def visit_uuid(self, type_, **kw):
+            return "CHAR(32)"
+        sqlite_dialect.visit_UUID = visit_uuid
+    else:
+        sqlite_dialect.visit_UUID = sqlite_dialect.visit_uuid
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

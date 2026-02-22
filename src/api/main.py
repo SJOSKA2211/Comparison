@@ -15,8 +15,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
 from pydantic import BaseModel, Field
 
-from src.database import engine
 from src.api.routers import auth, pricing, trading, user
+from src.database import engine
 
 logger = structlog.get_logger()
 
@@ -29,13 +29,13 @@ class Settings(BaseModel):
     database_url: str = Field(default="postgresql://localhost/bsopt")
     redis_url: str = Field(default="redis://localhost:6379/0")
     environment: str = Field(default="development")
-    
+
     # OAuth settings
     google_client_id: str = Field(default="")
     google_client_secret: str = Field(default="")
     github_client_id: str = Field(default="")
     github_client_secret: str = Field(default="")
-    
+
     # URLs
     frontend_url: str = Field(default="http://localhost:3000")
     api_url: str = Field(default="http://localhost:8000")
@@ -90,10 +90,10 @@ async def log_requests(request: Request, call_next):
     start_time = time.perf_counter()
     response = await call_next(request)
     duration_ms = (time.perf_counter() - start_time) * 1000
-    
+
     logger.info("request", method=request.method, path=request.url.path,
                 status=response.status_code, duration_ms=round(duration_ms, 2))
-    
+
     response.headers["X-Request-ID"] = request_id
     return response
 

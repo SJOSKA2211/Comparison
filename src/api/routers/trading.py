@@ -1,20 +1,24 @@
 from typing import List, Optional
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
-from src.database import get_db
-from src.models.trading import Portfolio, Position, Order, Watchlist, OrderStatus
+from src.api.deps import get_db, require_auth
 from src.models.market import MarketTick
+from src.models.trading import Order, OrderStatus, Portfolio, Position, Watchlist
 from src.schemas.trading import (
-    PortfolioCreate, PortfolioResponse, 
-    OrderCreate, OrderResponse, 
-    WatchlistCreate, WatchlistUpdate, WatchlistResponse,
-    PositionResponse
+    OrderCreate,
+    OrderResponse,
+    PortfolioCreate,
+    PortfolioResponse,
+    WatchlistCreate,
+    WatchlistResponse,
+    WatchlistUpdate,
 )
-from src.api.deps import require_auth, get_db
+
 # Remove local get_current_user_id and use dependency directly in endpoints if possible,
 # or keep a wrapper that returns UUID.
 
@@ -69,7 +73,7 @@ async def get_portfolio(
     portfolio = result.scalars().first()
     if not portfolio:
         raise HTTPException(status_code=404, detail="Portfolio not found")
-    
+
     # Feature Upgrade: Fetch latest prices for positions
     for pos in portfolio.positions:
         tick_result = await db.execute(
@@ -80,7 +84,7 @@ async def get_portfolio(
         )
         latest_price = tick_result.scalar()
         setattr(pos, "current_price", latest_price or pos.average_price)
-        
+
     return portfolio
 
 # =============================================================================
@@ -113,7 +117,7 @@ async def create_order(
         price=order.price,
         status=OrderStatus.PENDING # Default
     )
-    
+
     # Mock execution for MVP
     # In a real system, this would go to a matching engine or queue
     # For now, immediate fill for MARKET orders
@@ -122,16 +126,16 @@ async def create_order(
         new_order.filled_quantity = new_order.quantity
         # Fetch current price mock
         # In real implementation use MarketDataRouter
-        mock_price = 150.0 
+        mock_price = 150.0
         new_order.filled_price = mock_price
-        
+
         # Update Position
         # Check if position exists
         pos_result = await db.execute(
             select(Position).where(Position.portfolio_id == portfolio.id, Position.symbol == order.symbol)
         )
         position = pos_result.scalars().first()
-        
+
         if new_order.side == "buy":
             cost = new_order.filled_quantity * new_order.filled_price
             if portfolio.cash_balance >= cost:
@@ -150,7 +154,7 @@ async def create_order(
                     db.add(new_position)
             else:
                  new_order.status = OrderStatus.REJECTED # Insufficient funds
-        
+
         elif new_order.side == "sell":
             if position and position.quantity >= new_order.filled_quantity:
                 revenue = new_order.filled_quantity * new_order.filled_price
@@ -175,7 +179,7 @@ async def get_orders(
     query = select(Order).join(Portfolio).where(Portfolio.user_id == user_id)
     if portfolio_id:
         query = query.where(Order.portfolio_id == portfolio_id)
-    
+
     result = await db.execute(query)
     return result.scalars().all()
 
@@ -220,7 +224,7 @@ async def update_watchlist(
     watchlist = result.scalars().first()
     if not watchlist:
         raise HTTPException(status_code=404, detail="Watchlist not found")
-    
+
     watchlist.items = update.symbols
     await db.commit()
     await db.refresh(watchlist)

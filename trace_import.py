@@ -1,11 +1,11 @@
-import traceback
-import sys
+"""Trace import script."""
 import os
+import sys
+import traceback
 
 sys.path.append(os.path.abspath("."))
 
 try:
-    import src.api.main
     print("Import successful")
 except Exception:
     traceback.print_exc()

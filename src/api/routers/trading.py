@@ -1,8 +1,8 @@
 from typing import List, Optional
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.database import get_db
@@ -11,12 +11,9 @@ from src.models.market import MarketTick
 from src.schemas.trading import (
     PortfolioCreate, PortfolioResponse, 
     OrderCreate, OrderResponse, 
-    WatchlistCreate, WatchlistUpdate, WatchlistResponse,
-    PositionResponse
+    WatchlistCreate, WatchlistUpdate, WatchlistResponse
 )
-from src.api.deps import require_auth, get_db
-# Remove local get_current_user_id and use dependency directly in endpoints if possible,
-# or keep a wrapper that returns UUID.
+from src.api.deps import require_auth
 
 router = APIRouter(prefix="/trading", tags=["Trading"])
 
@@ -75,7 +72,7 @@ async def get_portfolio(
         tick_result = await db.execute(
             select(MarketTick.price)
             .where(MarketTick.symbol == pos.symbol)
-            .order_by(MarketTick.time.desc())
+            .order_by(MarketTick.timestamp.desc())
             .limit(1)
         )
         latest_price = tick_result.scalar()
@@ -100,9 +97,6 @@ async def create_order(
     portfolio = portfolio_result.scalars().first()
     if not portfolio:
         raise HTTPException(status_code=404, detail="Portfolio not found")
-
-    # TODO: Validate balance for BUY orders
-    # TODO: Validate position for SELL orders
 
     new_order = Order(
         portfolio_id=order.portfolio_id,

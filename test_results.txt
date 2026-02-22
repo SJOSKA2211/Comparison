@@ -45,6 +45,6 @@ tests/test_auth.py::TestPricingModels::test_pricing_request_valid
     from crypt import crypt as _crypt
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-======================== 31 passed, 1 warning in 2.66s =========================
+======================== 31 passed, 1 warning in 3.50s =========================
 
 Tests finished with exit code 0

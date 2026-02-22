@@ -1,7 +1,7 @@
 """Initial trading tables
 
 Revision ID: 1a2b3c4d5e6f
-Revises: 
+Revises:
 Create Date: 2024-02-08 12:00:00.000000
 
 """

@@ -7,23 +7,25 @@ from sqlalchemy import select
 
 from src.database import get_db
 from src.models.user import User, Session as UserSession
+from src.api.utils import get_token_hash
 
 async def get_current_user(request: Request, db: AsyncSession = Depends(get_db)) -> Optional[dict]:
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return None
-    
+
     token = auth_header[7:]
-    
-    # We use ORM to validate session instead of PL/pgSQL function
-    # Note: In a real system we'd use hashing for the token
+
+    # Securely hash the token before comparison
+    token_hash = get_token_hash(token)
+
     result = await db.execute(
         select(UserSession)
-        .where(UserSession.token_hash == token) # Simple match for MVP, would be hash in prod
+        .where(UserSession.token_hash == token_hash)
         .where(UserSession.expires_at > datetime.utcnow())
     )
     session = result.scalars().first()
-    
+
     if session:
         # Load user
         user_result = await db.execute(select(User).where(User.id == session.user_id))

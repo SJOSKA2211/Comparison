@@ -284,8 +284,8 @@ async def price_option(request: PricingRequest, user: dict = Depends(require_aut
     from src.pricing.numerical_methods import black_scholes_price
 
     result = black_scholes_price(
-        S=request.spot, K=request.strike, r=request.rate,
-        sigma=request.volatility, T=request.time_to_maturity,
+        spot=request.spot, strike=request.strike, rate=request.rate,
+        volatility=request.volatility, time_to_maturity=request.time_to_maturity,
         option_type=request.option_type,
     )
 
@@ -302,8 +302,8 @@ async def compare_methods(request: PricingRequest, user: dict = Depends(require_
 
     comparator = NumericalMethodComparator()
     results = comparator.compare_all(
-        S=request.spot, K=request.strike, r=request.rate,
-        sigma=request.volatility, T=request.time_to_maturity,
+        spot=request.spot, strike=request.strike, rate=request.rate,
+        volatility=request.volatility, time_to_maturity=request.time_to_maturity,
         option_type=request.option_type,
     )
 

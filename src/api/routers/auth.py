@@ -1,12 +1,12 @@
 import secrets
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional  # noqa: F401
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import RedirectResponse  # noqa: F401
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
+from sqlalchemy import select
 
 from src.database import get_db
 from src.api.deps import get_current_user

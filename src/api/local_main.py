@@ -20,7 +20,7 @@ try:
     import secrets
     import time
     from contextlib import asynccontextmanager
-    from typing import Any
+    from typing import Any  # noqa: F401
 
     import structlog
     from fastapi import Depends, FastAPI, HTTPException, Request, status

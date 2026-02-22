@@ -1,8 +1,5 @@
 import sys
-print("Python works")
+
+# import fastapi # Unused
 print(sys.executable)
-try:
-    import fastapi
-    print("FastAPI installed")
-except ImportError:
-    print("FastAPI missing")
+# print("FastAPI installed")

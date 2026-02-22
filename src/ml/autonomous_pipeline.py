@@ -3,6 +3,8 @@ BS-Opt ML Autonomous Pipeline
 Ray-based training and inference worker
 """
 
+# pylint: disable=import-outside-toplevel, logging-fstring-interpolation, invalid-name, global-statement, broadcast-assignment
+
 from __future__ import annotations
 
 import logging
@@ -48,8 +50,8 @@ def init_ray():
     global _ray_initialized
     if not _ray_initialized:
         import ray
-        
-        logger.info(f"Connecting to Ray cluster at {config.ray_address}")
+
+        logger.info("Connecting to Ray cluster at {config.ray_address}")
         ray.init(address=config.ray_address, ignore_reinit_error=True)
         _ray_initialized = True
         logger.info("Ray initialized successfully")
@@ -58,8 +60,8 @@ def init_ray():
 def get_model(name: str) -> Any:
     """Lazy load ML models"""
     if name not in _models:
-        logger.info(f"Loading model: {name}")
-        
+        logger.info("Loading model: {name}")
+
         if name == "neural_greeks":
             _models[name] = load_neural_greeks_model()
         elif name == "tft_forecaster":
@@ -68,7 +70,7 @@ def get_model(name: str) -> Any:
             _models[name] = load_finbert_model()
         else:
             raise ValueError(f"Unknown model: {name}")
-    
+
     return _models[name]
 
 
@@ -80,7 +82,7 @@ def load_neural_greeks_model():
     """Load pre-trained Neural Greeks approximation model"""
     import torch
     import torch.nn as nn
-    
+
     class NeuralGreeksNet(nn.Module):
         """Neural network to approximate Black-Scholes Greeks"""
         def __init__(self):
@@ -94,19 +96,19 @@ def load_neural_greeks_model():
                 nn.ReLU(),
                 nn.Linear(64, 6),  # [price, delta, gamma, theta, vega, rho]
             )
-        
+
         def forward(self, x):
             return self.net(x)
-    
+
     model = NeuralGreeksNet()
     model_path = os.path.join(config.model_dir, "neural_greeks.pt")
-    
+
     if os.path.exists(model_path):
-        model.load_state_dict(torch.load(model_path, map_location="cpu"))
+        model.load_state_dict(torch.load(model_path, map_location="cpu", weights_only=True))
         logger.info("Loaded pre-trained Neural Greeks model")
     else:
         logger.warning("No pre-trained model found, using random weights")
-    
+
     model.eval()
     return model
 
@@ -132,52 +134,52 @@ def load_finbert_model():
 def create_pricing_task():
     """Create Ray remote task for pricing"""
     import ray
-    
+
     @ray.remote
     def batch_price_options(options_batch: list[dict]) -> list[dict]:
         """Price multiple options in parallel on Ray cluster"""
         from src.pricing.numerical_methods import black_scholes_price
-        
+
         results = []
         for opt in options_batch:
             result = black_scholes_price(
-                S=opt["spot"],
-                K=opt["strike"],
-                r=opt["rate"],
-                sigma=opt["volatility"],
-                T=opt["time_to_maturity"],
+                spot=opt["spot"],
+                strike=opt["strike"],
+                rate=opt["rate"],
+                volatility=opt["volatility"],
+                time_to_maturity=opt["time_to_maturity"],
                 option_type=opt.get("option_type", "call"),
             )
             results.append({"input": opt, "result": result})
-        
+
         return results
-    
+
     return batch_price_options
 
 
 def create_training_task():
     """Create Ray RLlib training task"""
     import ray
-    
+
     @ray.remote(num_gpus=0)
     class TradingAgent:
         """RL Agent for trading decisions"""
-        
+
         def __init__(self):
             self.position = 0
             self.cash = 100000
             self.history = []
-        
+
         def get_action(self, state: dict) -> str:
             """Placeholder for RL policy"""
             # State: [price, sentiment, greeks]
             # Action: buy, sell, hold
             return "hold"
-        
+
         def train_step(self, batch: list[dict]) -> dict:
             """Single training step"""
             return {"loss": 0.0, "reward": 0.0}
-    
+
     return TradingAgent
 
 
@@ -187,27 +189,28 @@ def create_training_task():
 
 async def consume_market_data():
     """Consume market data from Kafka and trigger ML predictions"""
-    from aiokafka import AIOKafkaConsumer
     import json
-    
+
+    from aiokafka import AIOKafkaConsumer
+
     consumer = AIOKafkaConsumer(
         "market-ticks",
         bootstrap_servers=config.kafka_servers,
         group_id="ml-worker",
         value_deserializer=lambda m: json.loads(m.decode("utf-8")),
     )
-    
+
     await consumer.start()
     logger.info("Kafka consumer started")
-    
+
     try:
         async for msg in consumer:
             tick = msg.value
             logger.debug(f"Received tick: {tick['symbol']} @ {tick['price']}")
-            
+
             # Trigger ML inference if needed
             # This would feed into the RL agent or forecaster
-            
+
     finally:
         await consumer.stop()
 
@@ -221,33 +224,33 @@ def run_pipeline():
     logger.info("=" * 60)
     logger.info("BS-Opt ML Autonomous Pipeline Starting")
     logger.info("=" * 60)
-    
+
     # Initialize Ray
     init_ray()
-    
+
     # Setup MLflow
     try:
         import mlflow
         mlflow.set_tracking_uri(config.mlflow_uri)
         mlflow.set_experiment("bsopt-production")
-        logger.info(f"MLflow tracking: {config.mlflow_uri}")
+        logger.info("MLflow tracking: {config.mlflow_uri}")
     except Exception as e:
         logger.warning(f"MLflow not available: {e}")
-    
+
     # Run event loop for Kafka consumer
     import asyncio
-    
+
     async def main_loop():
         """Main async loop"""
         logger.info("Starting main event loop")
-        
+
         # Start Kafka consumer task
         try:
             await consume_market_data()
         except Exception as e:
             logger.error(f"Consumer error: {e}")
             # Retry logic would go here
-    
+
     try:
         asyncio.run(main_loop())
     except KeyboardInterrupt:

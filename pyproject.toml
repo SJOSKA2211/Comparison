@@ -7,8 +7,16 @@ addopts = "-v --tb=short"
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+# E: pycodestyle errors
+# F: Pyflakes
+# I: isort
+# N: pep8-naming
+# W: pycodestyle warnings
 select = ["E", "F", "I", "N", "W"]
-ignore = ["E501"]
+# E501: Line too long
+# N803: Argument name should be lowercase
+# N806: Variable in function should be lowercase
+ignore = ["E501", "N803", "N806"]
 
 [tool.ruff.isort]
 known-first-party = ["src"]

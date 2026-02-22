@@ -3,4 +3,4 @@ src.api.main: OK
 src.api.routers.trading: OK
 src.pricing.numerical_methods: OK
 src.models.market: OK
-src.ml.feature_engineering: OK
+src.ml.feature_engineering: ERROR (ModuleNotFoundError: No module named 'pandas')

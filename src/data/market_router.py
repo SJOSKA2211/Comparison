@@ -96,22 +96,18 @@ class DataSource(ABC):
     @abstractmethod
     async def connect(self) -> None:
         """Establish connection to data source"""
-        pass
     
     @abstractmethod
     async def disconnect(self) -> None:
         """Close connection"""
-        pass
     
     @abstractmethod
     async def subscribe(self, symbols: list[str]) -> None:
         """Subscribe to symbols"""
-        pass
     
     @abstractmethod
     async def stream(self) -> AsyncIterator[MarketTick]:
         """Stream ticks"""
-        pass
 
 
 # =============================================================================
@@ -338,7 +334,6 @@ class MarketDataRouter:
                     tick = task.result()
                     yield tick
                 except StopAsyncIteration:
-                    pass
 
 
 # =============================================================================

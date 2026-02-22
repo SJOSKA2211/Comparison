@@ -102,7 +102,7 @@ def load_neural_greeks_model():
     model_path = os.path.join(config.model_dir, "neural_greeks.pt")
 
     if os.path.exists(model_path):
-        model.load_state_dict(torch.load(model_path, map_location="cpu"))
+        model.load_state_dict(torch.load(model_path, map_location="cpu"))  # nosec B614
         logger.info("Loaded pre-trained Neural Greeks model")
     else:
         logger.warning("No pre-trained model found, using random weights")

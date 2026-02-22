@@ -219,8 +219,8 @@ async def register_user(user: UserCreate, db=Depends(get_db)):
     token = secrets.token_urlsafe(32)
     expires_at = "datetime('now', '+24 hours')"
     await db.execute(
-        f"INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, {expires_at})",
-        (user_id, token)
+        "INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, ?)",
+        (user_id, token, expires_at)
     )
     await db.commit()
 
@@ -345,4 +345,4 @@ async def get_demo_price(symbol: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("src.api.local_main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("src.api.local_main:app", host="127.0.0.1", port=8000, reload=True)

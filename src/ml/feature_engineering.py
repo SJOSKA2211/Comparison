@@ -4,6 +4,10 @@ from typing import List, Optional
 
 def calculate_technical_indicators(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate basic technical indicators for trading research"""
+    if df.empty:
+        for col in ["sma_20", "sma_50", "rsi", "returns", "volatility"]:
+            df[col] = pd.Series([], dtype=float)
+        return df
     # SMA
     df['sma_20'] = df['price'].rolling(window=20).mean()
     df['sma_50'] = df['price'].rolling(window=50).mean()

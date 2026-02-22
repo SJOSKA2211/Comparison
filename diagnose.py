@@ -1,5 +1,4 @@
 import sys
-import os
 
 with open("diagnosis.txt", "w") as f:
     f.write(f"Python: {sys.version}\n")
@@ -9,7 +8,7 @@ with open("diagnosis.txt", "w") as f:
         f.write("FastAPI: Installed\n")
     except ImportError:
         f.write("FastAPI: Missing\n")
-        
+
     try:
         import uvicorn
         f.write("Uvicorn: Installed\n")

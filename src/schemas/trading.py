@@ -1,8 +1,12 @@
+# pylint: disable=missing-module-docstring, missing-class-docstring, too-few-public-methods, import-error, no-name-in-module
 from datetime import datetime
-from uuid import UUID
 from typing import List, Optional
-from pydantic import BaseModel, Field, ConfigDict
-from src.models.trading import OrderSide, OrderType, OrderStatus
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
+
+from src.models.trading import OrderSide, OrderStatus, OrderType
+
 
 class PositionResponse(BaseModel):
     id: UUID

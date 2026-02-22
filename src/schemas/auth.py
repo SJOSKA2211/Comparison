@@ -1,6 +1,9 @@
+# pylint: disable=missing-module-docstring, missing-class-docstring, too-few-public-methods, import-error, no-name-in-module
 from typing import Optional
 from uuid import UUID
+
 from pydantic import BaseModel, EmailStr, Field
+
 
 class UserResponse(BaseModel):
     id: UUID

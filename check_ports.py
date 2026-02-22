@@ -1,5 +1,5 @@
 import socket
-import sys
+
 
 def check_port(port):
     try:

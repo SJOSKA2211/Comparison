@@ -1,4 +1,3 @@
-import sys
 
 packages = [
     "pydantic", "pydantic_settings", "aiosqlite", "structlog", "numpy", "scipy"

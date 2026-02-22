@@ -10,11 +10,7 @@ import sys
 import traceback
 
 # Startup diagnostics
-try:
-    with open("startup.log", "w") as f:
-        f.write("Starting local_main...\n")
-except:
-    pass
+sys.stderr.write("Starting local_main...\n")
 
 try:
     import secrets
@@ -28,13 +24,11 @@ try:
     from fastapi.responses import ORJSONResponse
     from pydantic import BaseModel, EmailStr, Field
 except Exception as e:
-    with open("startup_error.log", "w") as f:
-        f.write(f"Import Error: {e}\n{traceback.format_exc()}")
+    sys.stderr.write(f"Import Error: {e}\n{traceback.format_exc()}")
     sys.exit(1)
 
 logger = structlog.get_logger()
-with open("startup.log", "a") as f:
-    f.write("Imports successful\n") 
+logger.info("Imports successful")
 
 # =============================================================================
 # Configuration

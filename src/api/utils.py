@@ -1,3 +1,4 @@
+import hashlib
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -7,3 +8,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
+
+def get_token_hash(token: str) -> str:
+    """
+    Hash a token using SHA-256 for secure storage.
+    """
+    return hashlib.sha256(token.encode()).hexdigest()

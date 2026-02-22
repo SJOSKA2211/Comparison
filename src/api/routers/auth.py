@@ -10,7 +10,7 @@ from sqlalchemy import select, update
 
 from src.database import get_db
 from src.api.deps import get_current_user
-from src.api.utils import get_password_hash, verify_password
+from src.api.utils import get_password_hash, verify_password, get_token_hash
 from src.models.user import User, Session as UserSession, UserRole, OAuthProvider
 from src.models.trading import Portfolio
 from src.schemas.auth import UserCreate, TokenResponse, LoginRequest, UserResponse
@@ -19,9 +19,10 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 async def create_user_session(db: AsyncSession, user_id: UUID, request: Request = None) -> str:
     token = secrets.token_urlsafe(32)
+    token_hash = get_token_hash(token)
     new_session = UserSession(
         user_id=user_id,
-        token_hash=token, # In real app, store hash(token)
+        token_hash=token_hash, # Store hash(token)
         expires_at=datetime.utcnow() + timedelta(hours=24),
         ip_address=request.client.host if request and request.client else None,
         user_agent=request.headers.get("User-Agent") if request else None
@@ -106,4 +107,3 @@ async def get_me(user: dict = Depends(get_current_user), db: AsyncSession = Depe
     result = await db.execute(select(User).where(User.id == user["user_id"]))
     db_user = result.scalars().first()
     return db_user
-# ... (Continuing to oauth later if needed, but this covers the core stack)

@@ -12,7 +12,6 @@ from pydantic import ValidationError
 from src.api.routers.pricing import PricingRequest
 from src.schemas.auth import UserCreate
 
-
 # =============================================================================
 # Test User Models
 # =============================================================================
@@ -105,7 +104,7 @@ class TestOAuthUrls:
 
     def test_google_oauth_url_structure(self):
         """Verify Google OAuth URL structure"""
-        
+
         # pylint: disable=invalid-name
         google_auth_url = "https://accounts.google.com/o/oauth2/v2/auth"
         params = {
@@ -114,16 +113,16 @@ class TestOAuthUrls:
             "response_type": "code",
             "scope": "openid email profile",
         }
-        
+
         url = f"{google_auth_url}?{urlencode(params)}"
-        
+
         assert "accounts.google.com" in url
         assert "client_id=test-client-id" in url
         assert "response_type=code" in url
 
     def test_github_oauth_url_structure(self):
         """Verify GitHub OAuth URL structure"""
-        
+
         # pylint: disable=invalid-name
         github_auth_url = "https://github.com/login/oauth/authorize"
         params = {
@@ -131,9 +130,9 @@ class TestOAuthUrls:
             "redirect_uri": "http://localhost:8000/auth/github/callback",
             "scope": "read:user user:email",
         }
-        
+
         url = f"{github_auth_url}?{urlencode(params)}"
-        
+
         assert "github.com" in url
         assert "client_id=test-client-id" in url
 
@@ -148,14 +147,14 @@ class TestTokenGeneration:
     def test_secure_token_generation(self):
         """Test token generation length"""
         token = secrets.token_urlsafe(32)
-        
+
         assert len(token) >= 32
         assert isinstance(token, str)
 
     def test_tokens_are_unique(self):
         """Test token uniqueness"""
         tokens = [secrets.token_urlsafe(32) for _ in range(100)]
-        
+
         assert len(set(tokens)) == 100  # All unique
 
 

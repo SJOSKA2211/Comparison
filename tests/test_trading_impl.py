@@ -1,19 +1,26 @@
 # pylint: disable=wrong-import-position, wrong-import-order
-import pytest_asyncio
-import pytest
 import uuid
 from datetime import datetime, timedelta, timezone
+
+import pytest
+import pytest_asyncio
 
 # Patch UUID for SQLite compatibility
 import sqlalchemy.dialects.postgresql
 from sqlalchemy import Uuid
+
 sqlalchemy.dialects.postgresql.UUID = Uuid
 
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker # noqa: E402
-from src.database import Base # noqa: E402
-from src.models.trading import Portfolio, Position # noqa: E402
-from src.models.market import MarketTick # noqa: E402
-from src.api.routers.trading import get_portfolio # noqa: E402
+from sqlalchemy.ext.asyncio import (  # noqa: E402
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+
+from src.api.routers.trading import get_portfolio  # noqa: E402
+from src.database import Base  # noqa: E402
+from src.models.market import MarketTick  # noqa: E402
+from src.models.trading import Portfolio, Position  # noqa: E402
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -29,7 +36,9 @@ async def db_session():
         def visit_uuid(self, type_, **kw):
             return "CHAR(32)"
         sqlite_dialect.visit_UUID = visit_uuid
-    else:
+
+    # Also patch visit_UUID directly in case it's used instead of visit_uuid lookup
+    if not hasattr(sqlite_dialect, 'visit_UUID'):
         sqlite_dialect.visit_UUID = sqlite_dialect.visit_uuid
 
     async with engine.begin() as conn:

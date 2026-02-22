@@ -107,7 +107,7 @@ def load_neural_greeks_model():
 
     if os.path.exists(model_path):
         # nosec B614 - Trusted model path
-        model.load_state_dict(torch.load(model_path, map_location="cpu")) # pylint: disable=no-member
+        model.load_state_dict(torch.load(model_path, map_location="cpu")) # pylint: disable=no-member # nosec B614
         logger.info("Loaded pre-trained Neural Greeks model")
     else:
         logger.warning("No pre-trained model found, using random weights")

@@ -217,9 +217,9 @@ async def register_user(user: UserCreate, db=Depends(get_db)):
 
     # Create session
     token = secrets.token_urlsafe(32)
-    expires_at = "datetime('now', '+24 hours')"
+
     await db.execute(
-        f"INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, {expires_at})",
+        "INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, datetime('now', '+24 hours'))",
         (user_id, token)
     )
     await db.commit()
@@ -284,8 +284,8 @@ async def price_option(request: PricingRequest, user: dict = Depends(require_aut
     from src.pricing.numerical_methods import black_scholes_price
 
     result = black_scholes_price(
-        S=request.spot, K=request.strike, r=request.rate,
-        sigma=request.volatility, T=request.time_to_maturity,
+        spot=request.spot, strike=request.strike, rate=request.rate,
+        volatility=request.volatility, time_to_maturity=request.time_to_maturity,
         option_type=request.option_type,
     )
 
@@ -302,8 +302,8 @@ async def compare_methods(request: PricingRequest, user: dict = Depends(require_
 
     comparator = NumericalMethodComparator()
     results = comparator.compare_all(
-        S=request.spot, K=request.strike, r=request.rate,
-        sigma=request.volatility, T=request.time_to_maturity,
+        spot=request.spot, strike=request.strike, rate=request.rate,
+        volatility=request.volatility, time_to_maturity=request.time_to_maturity,
         option_type=request.option_type,
     )
 
@@ -345,4 +345,4 @@ async def get_demo_price(symbol: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("src.api.local_main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("src.api.local_main:app", host="127.0.0.1", port=8000, reload=True)

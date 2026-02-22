@@ -9,7 +9,7 @@ with open("diagnosis.txt", "w") as f:
         f.write("FastAPI: Installed\n")
     except ImportError:
         f.write("FastAPI: Missing\n")
-        
+
     try:
         import uvicorn
         f.write("Uvicorn: Installed\n")

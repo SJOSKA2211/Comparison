@@ -13,9 +13,9 @@ async def get_current_user(request: Request, db: AsyncSession = Depends(get_db))
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return None
-    
+
     token = auth_header[7:]
-    
+
     # Securely hash the token before comparison
     token_hash = get_token_hash(token)
 
@@ -25,7 +25,7 @@ async def get_current_user(request: Request, db: AsyncSession = Depends(get_db))
         .where(UserSession.expires_at > datetime.utcnow())
     )
     session = result.scalars().first()
-    
+
     if session:
         # Load user
         user_result = await db.execute(select(User).where(User.id == session.user_id))

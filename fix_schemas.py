@@ -1,4 +1,49 @@
-"""Trading schemas."""
+import sys
+
+# src/schemas/auth.py
+auth_content = """\"\"\"Authentication schemas.\"\"\"
+from typing import Optional
+from uuid import UUID
+
+from pydantic import BaseModel, EmailStr, Field
+
+
+class UserResponse(BaseModel):
+    \"\"\"User response schema.\"\"\"
+    id: UUID
+    email: str
+    role: str
+    email_verified: bool = False
+    display_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+
+class LoginRequest(BaseModel):
+    \"\"\"Login request schema.\"\"\"
+    email: EmailStr
+    password: str
+
+
+class TokenResponse(BaseModel):
+    \"\"\"Token response schema.\"\"\"
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int = 86400
+    user: Optional[UserResponse] = None
+
+
+class UserCreate(BaseModel):
+    \"\"\"User creation schema.\"\"\"
+    email: EmailStr
+    password: str = Field(min_length=8)
+    role: str = Field(default="trader", pattern="^(trader|researcher|admin)$")
+"""
+
+with open("src/schemas/auth.py", "w") as f:
+    f.write(auth_content)
+
+# src/schemas/trading.py
+trading_content = """\"\"\"Trading schemas.\"\"\"
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
@@ -9,7 +54,7 @@ from src.models.trading import OrderSide, OrderStatus, OrderType
 
 
 class PositionResponse(BaseModel):
-    """Position response schema."""
+    \"\"\"Position response schema.\"\"\"
     id: UUID
     portfolio_id: UUID
     symbol: str
@@ -23,7 +68,7 @@ class PositionResponse(BaseModel):
 
 
 class OrderCreate(BaseModel):
-    """Order creation schema."""
+    \"\"\"Order creation schema.\"\"\"
     portfolio_id: UUID
     symbol: str
     side: OrderSide
@@ -33,7 +78,7 @@ class OrderCreate(BaseModel):
 
 
 class OrderResponse(BaseModel):
-    """Order response schema."""
+    \"\"\"Order response schema.\"\"\"
     id: UUID
     portfolio_id: UUID
     symbol: str
@@ -51,13 +96,13 @@ class OrderResponse(BaseModel):
 
 
 class PortfolioCreate(BaseModel):
-    """Portfolio creation schema."""
+    \"\"\"Portfolio creation schema.\"\"\"
     name: str = "Main Portfolio"
     currency: str = "USD"
 
 
 class PortfolioResponse(BaseModel):
-    """Portfolio response schema."""
+    \"\"\"Portfolio response schema.\"\"\"
     id: UUID
     user_id: UUID
     name: str
@@ -71,18 +116,18 @@ class PortfolioResponse(BaseModel):
 
 
 class WatchlistCreate(BaseModel):
-    """Watchlist creation schema."""
+    \"\"\"Watchlist creation schema.\"\"\"
     name: str
     symbols: List[str] = []
 
 
 class WatchlistUpdate(BaseModel):
-    """Watchlist update schema."""
+    \"\"\"Watchlist update schema.\"\"\"
     symbols: List[str]
 
 
 class WatchlistResponse(BaseModel):
-    """Watchlist response schema."""
+    \"\"\"Watchlist response schema.\"\"\"
     id: UUID
     user_id: UUID
     name: str
@@ -91,3 +136,7 @@ class WatchlistResponse(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+"""
+
+with open("src/schemas/trading.py", "w") as f:
+    f.write(trading_content)

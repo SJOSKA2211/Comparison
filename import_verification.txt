@@ -1,6 +1,6 @@
-src.database: OK
-src.api.main: OK
-src.api.routers.trading: OK
-src.pricing.numerical_methods: OK
-src.models.market: OK
-src.ml.feature_engineering: OK
+src.database: ERROR (ModuleNotFoundError: No module named 'sqlalchemy')
+src.api.main: ERROR (ModuleNotFoundError: No module named 'structlog')
+src.api.routers.trading: ERROR (ModuleNotFoundError: No module named 'fastapi')
+src.pricing.numerical_methods: ERROR (ModuleNotFoundError: No module named 'numpy')
+src.models.market: ERROR (ModuleNotFoundError: No module named 'src.models')
+src.ml.feature_engineering: ERROR (ModuleNotFoundError: No module named 'numpy')

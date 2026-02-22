@@ -18,6 +18,7 @@ except Exception:
 
 try:
     import secrets
+    from datetime import datetime, timedelta
     import time
     from contextlib import asynccontextmanager
 
@@ -219,10 +220,10 @@ async def register_user(user: UserCreate, db=Depends(get_db)):
 
     # Create session
     token = secrets.token_urlsafe(32)
-    expires_at = "datetime('now', '+24 hours')"
+    expires_at = datetime.now() + timedelta(hours=24)
     await db.execute(
-        f"INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, {expires_at})",
-        (user_id, token)
+        "INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, ?)",
+        (user_id, token, expires_at)
     )
     await db.commit()
 
@@ -344,4 +345,4 @@ async def get_demo_price(symbol: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("src.api.local_main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("src.api.local_main:app", host="0.0.0.0", port=8000, reload=True)  # nosec B104

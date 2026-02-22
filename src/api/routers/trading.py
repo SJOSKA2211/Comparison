@@ -70,15 +70,36 @@ async def get_portfolio(
     if not portfolio:
         raise HTTPException(status_code=404, detail="Portfolio not found")
     
-    # Feature Upgrade: Fetch latest prices for positions
-    for pos in portfolio.positions:
-        tick_result = await db.execute(
-            select(MarketTick.price)
-            .where(MarketTick.symbol == pos.symbol)
-            .order_by(MarketTick.time.desc())
-            .limit(1)
+    # Feature Upgrade: Fetch latest prices for positions (Optimized)
+    position_symbols = list({pos.symbol for pos in portfolio.positions})
+    current_prices = {}
+
+    if position_symbols:
+        # Fetch latest price for each symbol in one query
+        latest_times_subq = (
+            select(
+                MarketTick.symbol,
+                func.max(MarketTick.time).label("max_time")
+            )
+            .where(MarketTick.symbol.in_(position_symbols))
+            .group_by(MarketTick.symbol)
+            .subquery()
         )
-        latest_price = tick_result.scalar()
+
+        stmt = (
+            select(MarketTick.symbol, MarketTick.price)
+            .join(
+                latest_times_subq,
+                (MarketTick.symbol == latest_times_subq.c.symbol) &
+                (MarketTick.time == latest_times_subq.c.max_time)
+            )
+        )
+
+        tick_result = await db.execute(stmt)
+        current_prices = {row.symbol: row.price for row in tick_result.all()}
+
+    for pos in portfolio.positions:
+        latest_price = current_prices.get(pos.symbol)
         setattr(pos, "current_price", latest_price or pos.average_price)
         
     return portfolio

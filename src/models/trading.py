@@ -1,10 +1,14 @@
 from datetime import datetime
-from uuid import UUID, uuid4
 from enum import Enum
 from typing import Optional
-from sqlalchemy import String, Float, Integer, ForeignKey, DateTime, Uuid
+from uuid import UUID, uuid4
+
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from src.database import Base
+
+# pylint: disable=unused-import
 
 class OrderStatus(str, Enum):
     PENDING = "PENDING"

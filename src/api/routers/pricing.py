@@ -1,15 +1,15 @@
 import time
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
+
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel, Field
 
 from src.database import get_db
 from src.api.deps import require_auth
-from src.schemas.auth import UserResponse # Reuse or create specific one
 from src.pricing.numerical_methods import black_scholes_price, NumericalMethodComparator
 from src.models.market import NumericalExperiment
-from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/pricing", tags=["Pricing"])
 

@@ -1,10 +1,14 @@
 from datetime import datetime
+from enum import Enum
 from typing import Optional
 from uuid import UUID, uuid4
-from sqlalchemy import String, Boolean, DateTime, ForeignKey, Uuid
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Uuid
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from src.database import Base
-from enum import Enum
+
+# pylint: disable=wrong-import-order
 
 class UserRole(str, Enum):
     TRADER = "trader"

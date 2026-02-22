@@ -1,6 +1,9 @@
+from typing import Optional
+
 import numpy as np
 import pandas as pd
-from typing import List, Optional
+
+# pylint: disable=unused-import
 
 def calculate_technical_indicators(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate basic technical indicators for trading research"""

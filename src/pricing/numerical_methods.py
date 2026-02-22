@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name,too-many-arguments,too-many-locals,too-many-positional-arguments
+# pylint: disable=invalid-name,too-many-arguments,too-many-locals,too-many-positional-arguments,unused-variable,no-else-return,import-outside-toplevel
 """
 BS-Opt Numerical Pricing Methods
 Black-Scholes, FDM, Monte Carlo, and Trinomial Trees

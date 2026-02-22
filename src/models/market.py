@@ -2,10 +2,13 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 from uuid import UUID, uuid4
+
 from pydantic import BaseModel
-from sqlalchemy import String, Float, Integer, DateTime, ForeignKey, Uuid
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
+
 from src.database import Base
+
 
 class Exchange(str, Enum):
     NYSE = "NYSE"

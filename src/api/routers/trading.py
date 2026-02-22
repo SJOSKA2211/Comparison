@@ -1,8 +1,9 @@
 from typing import List, Optional
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from src.database import get_db
@@ -12,9 +13,8 @@ from src.schemas.trading import (
     PortfolioCreate, PortfolioResponse,
     OrderCreate, OrderResponse,
     WatchlistCreate, WatchlistUpdate, WatchlistResponse,
-    PositionResponse
 )
-from src.api.deps import require_auth, get_db
+from src.api.deps import require_auth
 # Remove local get_current_user_id and use dependency directly in endpoints if possible,
 # or keep a wrapper that returns UUID.
 

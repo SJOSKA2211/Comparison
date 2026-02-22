@@ -6,6 +6,7 @@ Ray-based training and inference worker
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 from dataclasses import dataclass
@@ -80,7 +81,7 @@ def get_model(name: str) -> Any:
 def load_neural_greeks_model():
     """Load pre-trained Neural Greeks approximation model"""
     import torch
-    import torch.nn as nn
+    from torch import nn
 
     class NeuralGreeksNet(nn.Module):
         """Neural network to approximate Black-Scholes Greeks"""
@@ -188,8 +189,8 @@ def create_training_task():
 
 async def consume_market_data():
     """Consume market data from Kafka and trigger ML predictions"""
-    from aiokafka import AIOKafkaConsumer
     import json
+    from aiokafka import AIOKafkaConsumer
 
     consumer = AIOKafkaConsumer(
         "market-ticks",
@@ -236,7 +237,6 @@ def run_pipeline():
         logger.warning(f"MLflow not available: {e}")
 
     # Run event loop for Kafka consumer
-    import asyncio
 
     async def main_loop():
         """Main async loop"""

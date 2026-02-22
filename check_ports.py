@@ -1,5 +1,5 @@
 import socket
-import sys
+
 
 def check_port(port):
     try:
@@ -7,7 +7,7 @@ def check_port(port):
             s.settimeout(1)
             result = s.connect_ex(('127.0.0.1', port))
             return result == 0
-    except:
+    except Exception:
         return False
 
 ports = {

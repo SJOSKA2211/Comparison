@@ -1,3 +1,8 @@
+# pylint: disable=invalid-name
+# pylint: disable=invalid-name
+# pylint: disable=invalid-name
+# pylint: disable=invalid-name
+# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring, too-few-public-methods, import-error, wrong-import-order
 import os
 from typing import AsyncGenerator
 
@@ -32,8 +37,10 @@ AsyncSessionLocal = async_sessionmaker(
     autoflush=False,
 )
 
+
 class Base(DeclarativeBase):
     pass
+
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:

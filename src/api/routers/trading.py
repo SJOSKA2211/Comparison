@@ -1,3 +1,5 @@
+# pylint: disable=missing-module-docstring, import-error, no-name-in-module, missing-function-docstring, line-too-long, bad-indentation, fixme
+# pylint: disable=missing-function-docstring, fixme
 from typing import List, Optional
 from uuid import UUID
 
@@ -24,34 +26,33 @@ from src.schemas.trading import (
 
 router = APIRouter(prefix="/trading", tags=["Trading"])
 
+
 # Dependency to get current user ID
 async def get_current_user_id(user: dict = Depends(require_auth)) -> UUID:
     return user["user_id"]
+
 
 # =============================================================================
 # Portfolios
 # =============================================================================
 
+
 @router.post("/portfolios", response_model=PortfolioResponse)
 async def create_portfolio(
     portfolio: PortfolioCreate,
     user_id: UUID = Depends(get_current_user_id),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
-    new_portfolio = Portfolio(
-        user_id=user_id,
-        name=portfolio.name,
-        currency=portfolio.currency
-    )
+    new_portfolio = Portfolio(user_id=user_id, name=portfolio.name, currency=portfolio.currency)
     db.add(new_portfolio)
     await db.commit()
     await db.refresh(new_portfolio)
     return new_portfolio
 
+
 @router.get("/portfolios", response_model=List[PortfolioResponse])
 async def get_portfolios(
-    user_id: UUID = Depends(get_current_user_id),
-    db: AsyncSession = Depends(get_db)
+    user_id: UUID = Depends(get_current_user_id), db: AsyncSession = Depends(get_db)
 ):
     result = await db.execute(
         select(Portfolio)
@@ -60,11 +61,9 @@ async def get_portfolios(
     )
     return result.scalars().all()
 
+
 @router.get("/portfolios/{portfolio_id}", response_model=PortfolioResponse)
-async def get_portfolio(
-    portfolio_id: UUID,
-    db: AsyncSession = Depends(get_db)
-):
+async def get_portfolio(portfolio_id: UUID, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(Portfolio)
         .where(Portfolio.id == portfolio_id)
@@ -87,15 +86,17 @@ async def get_portfolio(
 
     return portfolio
 
+
 # =============================================================================
 # Orders
 # =============================================================================
+
 
 @router.post("/orders", response_model=OrderResponse)
 async def create_order(
     order: OrderCreate,
     user_id: UUID = Depends(get_current_user_id),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     # Verify portfolio ownership
     portfolio_result = await db.execute(
@@ -115,7 +116,7 @@ async def create_order(
         order_type=order.order_type,
         quantity=order.quantity,
         price=order.price,
-        status=OrderStatus.PENDING # Default
+        status=OrderStatus.PENDING,  # Default
     )
 
     # Mock execution for MVP
@@ -132,7 +133,9 @@ async def create_order(
         # Update Position
         # Check if position exists
         pos_result = await db.execute(
-            select(Position).where(Position.portfolio_id == portfolio.id, Position.symbol == order.symbol)
+            select(Position).where(
+                Position.portfolio_id == portfolio.id, Position.symbol == order.symbol
+            )
         )
         position = pos_result.scalars().first()
 
@@ -149,11 +152,11 @@ async def create_order(
                         portfolio_id=portfolio.id,
                         symbol=order.symbol,
                         quantity=new_order.filled_quantity,
-                        average_price=new_order.filled_price
+                        average_price=new_order.filled_price,
                     )
                     db.add(new_position)
             else:
-                 new_order.status = OrderStatus.REJECTED # Insufficient funds
+                new_order.status = OrderStatus.REJECTED  # Insufficient funds
 
         elif new_order.side == "sell":
             if position and position.quantity >= new_order.filled_quantity:
@@ -163,18 +166,19 @@ async def create_order(
                 if position.quantity == 0:
                     await db.delete(position)
             else:
-                new_order.status = OrderStatus.REJECTED # Insufficient position
+                new_order.status = OrderStatus.REJECTED  # Insufficient position
 
     db.add(new_order)
     await db.commit()
     await db.refresh(new_order)
     return new_order
 
+
 @router.get("/orders", response_model=List[OrderResponse])
 async def get_orders(
     portfolio_id: Optional[UUID] = None,
     user_id: UUID = Depends(get_current_user_id),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     query = select(Order).join(Portfolio).where(Portfolio.user_id == user_id)
     if portfolio_id:
@@ -183,40 +187,39 @@ async def get_orders(
     result = await db.execute(query)
     return result.scalars().all()
 
+
 # =============================================================================
 # Watchlists
 # =============================================================================
+
 
 @router.post("/watchlists", response_model=WatchlistResponse)
 async def create_watchlist(
     watchlist: WatchlistCreate,
     user_id: UUID = Depends(get_current_user_id),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
-    new_watchlist = Watchlist(
-        user_id=user_id,
-        name=watchlist.name,
-        items=watchlist.symbols
-    )
+    new_watchlist = Watchlist(user_id=user_id, name=watchlist.name, items=watchlist.symbols)
     db.add(new_watchlist)
     await db.commit()
     await db.refresh(new_watchlist)
     return new_watchlist
 
+
 @router.get("/watchlists", response_model=List[WatchlistResponse])
 async def get_watchlists(
-    user_id: UUID = Depends(get_current_user_id),
-    db: AsyncSession = Depends(get_db)
+    user_id: UUID = Depends(get_current_user_id), db: AsyncSession = Depends(get_db)
 ):
     result = await db.execute(select(Watchlist).where(Watchlist.user_id == user_id))
     return result.scalars().all()
+
 
 @router.put("/watchlists/{watchlist_id}", response_model=WatchlistResponse)
 async def update_watchlist(
     watchlist_id: UUID,
     update: WatchlistUpdate,
     user_id: UUID = Depends(get_current_user_id),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
         select(Watchlist).where(Watchlist.id == watchlist_id, Watchlist.user_id == user_id)

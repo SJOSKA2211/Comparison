@@ -1,4 +1,5 @@
 # pylint: disable=duplicate-code
+# pylint: disable=duplicate-code
 """
 BS-Opt Test Suite
 Tests for pricing engine numerical methods
@@ -34,6 +35,7 @@ TOLERANCE_PCT = 1.0  # 1% max error
 # =============================================================================
 # Black-Scholes Analytical Tests
 # =============================================================================
+
 
 class TestBlackScholes:
     """Tests for analytical Black-Scholes pricing"""
@@ -91,6 +93,7 @@ class TestBlackScholes:
 # Finite Difference Method Tests
 # =============================================================================
 
+
 class TestCrankNicolson:
     """Tests for Crank-Nicolson FDM"""
 
@@ -127,14 +130,16 @@ class TestCrankNicolson:
 # Monte Carlo Tests
 # =============================================================================
 
+
 class TestMonteCarlo:
     """Tests for Monte Carlo pricing"""
 
     def test_accuracy_vs_analytical(self):
         """MC should match analytical within confidence interval"""
         analytical = black_scholes_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call")
-        mc = monte_carlo_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call",
-                              num_paths=100000, seed=42)
+        mc = monte_carlo_price(
+            SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", num_paths=100000, seed=42
+        )
 
         # Within 3 standard errors
         error = abs(mc["price"] - analytical["price"])
@@ -142,8 +147,9 @@ class TestMonteCarlo:
 
     def test_antithetic_reduces_variance(self):
         """Antithetic sampling should give reasonable standard error"""
-        mc = monte_carlo_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call",
-                              num_paths=100000, seed=42)
+        mc = monte_carlo_price(
+            SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", num_paths=100000, seed=42
+        )
 
         # Standard error should be small relative to price
         assert mc["std_error"] < mc["price"] * 0.01  # < 1% of price
@@ -160,6 +166,7 @@ class TestMonteCarlo:
 # Trinomial Tree Tests
 # =============================================================================
 
+
 class TestTrinomialTree:
     """Tests for trinomial tree pricing"""
 
@@ -175,10 +182,12 @@ class TestTrinomialTree:
         """Richardson extrapolation should improve accuracy"""
         analytical = black_scholes_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call")
 
-        no_richardson = trinomial_tree_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call",
-                                             N=100, use_richardson=False)
-        with_richardson = trinomial_tree_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call",
-                                               N=100, use_richardson=True)
+        no_richardson = trinomial_tree_price(
+            SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", N=100, use_richardson=False
+        )
+        with_richardson = trinomial_tree_price(
+            SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", N=100, use_richardson=True
+        )
 
         error_no = abs(no_richardson["price"] - analytical["price"])
         error_with = abs(with_richardson["price"] - analytical["price"])
@@ -192,16 +201,13 @@ class TestTrinomialTree:
 # Comparative Analysis Tests
 # =============================================================================
 
+
 class TestNumericalMethodComparator:
     """Tests for the method comparator"""
 
     def test_all_methods_return_results(self):
         """All methods should return valid results"""
-        comparator = NumericalMethodComparator(
-            fdm_grid_size=100,
-            mc_paths=50000,
-            tree_steps=100
-        )
+        comparator = NumericalMethodComparator(fdm_grid_size=100, mc_paths=50000, tree_steps=100)
 
         results = comparator.compare_all(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call")
 
@@ -228,6 +234,7 @@ class TestNumericalMethodComparator:
 # =============================================================================
 # Edge Cases
 # =============================================================================
+
 
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions"""

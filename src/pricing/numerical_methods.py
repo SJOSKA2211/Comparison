@@ -1,3 +1,4 @@
+# pylint: disable=no-else-return
 # ruff: noqa: N803, N806, PLR0913, PLR0917, PLR0914
 # pylint: disable=invalid-name, too-many-arguments, too-many-locals, too-many-positional-arguments
 """
@@ -18,6 +19,7 @@ from scipy.stats import norm
 # =============================================================================
 # Analytical Black-Scholes
 # =============================================================================
+
 
 def black_scholes_price(
     S: float,
@@ -44,11 +46,23 @@ def black_scholes_price(
     if T <= 0:
         # At expiration
         if option_type == "call":
-            return {"price": max(S - K, 0), "delta": 1 if S > K else 0,
-                    "gamma": 0, "theta": 0, "vega": 0, "rho": 0}
+            return {
+                "price": max(S - K, 0),
+                "delta": 1 if S > K else 0,
+                "gamma": 0,
+                "theta": 0,
+                "vega": 0,
+                "rho": 0,
+            }
         else:
-            return {"price": max(K - S, 0), "delta": -1 if S < K else 0,
-                    "gamma": 0, "theta": 0, "vega": 0, "rho": 0}
+            return {
+                "price": max(K - S, 0),
+                "delta": -1 if S < K else 0,
+                "gamma": 0,
+                "theta": 0,
+                "vega": 0,
+                "rho": 0,
+            }
 
     sqrt_T = math.sqrt(T)
     d1 = (math.log(S / K) + (r + 0.5 * sigma**2) * T) / (sigma * sqrt_T)
@@ -76,8 +90,10 @@ def black_scholes_price(
     # Greeks (same for call/put except delta and rho)
     gamma = n_d1 / (S * sigma * sqrt_T)
     vega = S * n_d1 * sqrt_T / 100
-    theta = (-(S * n_d1 * sigma) / (2 * sqrt_T) - r * K * df *
-             (N_d2 if option_type == "call" else norm.cdf(-d2))) / 365
+    theta = (
+        -(S * n_d1 * sigma) / (2 * sqrt_T)
+        - r * K * df * (N_d2 if option_type == "call" else norm.cdf(-d2))
+    ) / 365
 
     return {
         "price": price,
@@ -92,6 +108,7 @@ def black_scholes_price(
 # =============================================================================
 # Finite Difference Method (Crank-Nicolson)
 # =============================================================================
+
 
 def crank_nicolson_price(
     S: float,
@@ -114,7 +131,6 @@ def crank_nicolson_price(
         S_max = 4 * K
 
     dt = T / N
-
 
     # Grid
     S_grid = np.linspace(0, S_max, M + 1)
@@ -211,6 +227,7 @@ def solve_tridiagonal(a: np.ndarray, b: np.ndarray, c: np.ndarray, d: np.ndarray
 # Monte Carlo (Antithetic Variance Reduction)
 # =============================================================================
 
+
 def monte_carlo_price(
     S: float,
     K: float,
@@ -264,6 +281,7 @@ def monte_carlo_price(
 # Trinomial Tree with Richardson Extrapolation
 # =============================================================================
 
+
 def trinomial_tree_price(
     S: float,
     K: float,
@@ -285,14 +303,16 @@ def trinomial_tree_price(
         # Trinomial parameters
         u = np.exp(sigma * np.sqrt(2 * dt))
 
-
-
         # Risk-neutral probabilities
         sqrt_dt = np.sqrt(dt / 2)
-        pu = ((np.exp(r * dt / 2) - np.exp(-sigma * sqrt_dt)) /
-              (np.exp(sigma * sqrt_dt) - np.exp(-sigma * sqrt_dt)))**2
-        pd = ((np.exp(sigma * sqrt_dt) - np.exp(r * dt / 2)) /
-              (np.exp(sigma * sqrt_dt) - np.exp(-sigma * sqrt_dt)))**2
+        pu = (
+            (np.exp(r * dt / 2) - np.exp(-sigma * sqrt_dt))
+            / (np.exp(sigma * sqrt_dt) - np.exp(-sigma * sqrt_dt))
+        ) ** 2
+        pd = (
+            (np.exp(sigma * sqrt_dt) - np.exp(r * dt / 2))
+            / (np.exp(sigma * sqrt_dt) - np.exp(-sigma * sqrt_dt))
+        ) ** 2
         pm = 1 - pu - pd
 
         # Initialize asset prices at maturity
@@ -336,6 +356,7 @@ def trinomial_tree_price(
 # =============================================================================
 # Numerical Method Comparator (Research Tool)
 # =============================================================================
+
 
 @dataclass
 class NumericalMethodComparator:

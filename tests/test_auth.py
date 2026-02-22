@@ -1,8 +1,9 @@
+# pylint: disable=missing-function-docstring, import-outside-toplevel, no-name-in-module, import-error, invalid-name
+# pylint: disable=missing-function-docstring, no-name-in-module, import-error, import-outside-toplevel
 """
 BS-Opt Test Suite
 Tests for authentication functions
 """
-
 
 import pytest
 
@@ -10,17 +11,14 @@ import pytest
 # Test User Models
 # =============================================================================
 
+
 class TestUserModels:
     """Tests for Pydantic user models"""
 
     def test_user_create_valid(self):
         from src.api.main import UserCreate
 
-        user = UserCreate(
-            email="test@example.com",
-            password="securepassword123",
-            role="trader"
-        )
+        user = UserCreate(email="test@example.com", password="securepassword123", role="trader")
         assert user.email == "test@example.com"
         assert user.role == "trader"
 
@@ -59,6 +57,7 @@ class TestUserModels:
 # Test Pricing Models
 # =============================================================================
 
+
 class TestPricingModels:
     """Tests for pricing request/response models"""
 
@@ -71,7 +70,7 @@ class TestPricingModels:
             rate=0.05,
             volatility=0.2,
             time_to_maturity=1.0,
-            option_type="call"
+            option_type="call",
         )
         assert req.spot == 100.0
         assert req.option_type == "call"
@@ -88,7 +87,7 @@ class TestPricingModels:
                 rate=0.05,
                 volatility=0.2,
                 time_to_maturity=1.0,
-                option_type="call"
+                option_type="call",
             )
 
     def test_pricing_request_invalid_option_type(self):
@@ -103,13 +102,14 @@ class TestPricingModels:
                 rate=0.05,
                 volatility=0.2,
                 time_to_maturity=1.0,
-                option_type="straddle"  # Invalid
+                option_type="straddle",  # Invalid
             )
 
 
 # =============================================================================
 # Test OAuth URL Generation
 # =============================================================================
+
 
 class TestOAuthUrls:
     """Tests for OAuth URL handling"""
@@ -152,6 +152,7 @@ class TestOAuthUrls:
 # =============================================================================
 # Test Token Generation
 # =============================================================================
+
 
 class TestTokenGeneration:
     """Tests for token/secret generation"""

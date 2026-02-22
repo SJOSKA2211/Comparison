@@ -1,3 +1,5 @@
+# pylint: disable=missing-module-docstring, missing-function-docstring, import-error, no-name-in-module
+# pylint: disable=missing-function-docstring, import-error, no-name-in-module
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,6 +10,7 @@ from src.models.user import User
 from src.schemas.auth import UserResponse
 
 router = APIRouter(prefix="/users", tags=["Users"])
+
 
 @router.get("/profile", response_model=UserResponse)
 async def get_profile(user: dict = Depends(require_auth), db: AsyncSession = Depends(get_db)):

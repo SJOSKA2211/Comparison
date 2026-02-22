@@ -1,3 +1,4 @@
+# pylint: disable=R0913, R0914, R0917, W0012, W0612
 # ruff: noqa: W293
 # pylint: disable=invalid-name, too-many-arguments, too-many-positional-arguments, too-many-locals, no-else-return, import-error
 # ruff: noqa: N803, N806

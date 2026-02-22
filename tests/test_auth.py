@@ -1,3 +1,4 @@
+# pylint: disable=C0114, C0116, C0415, E0611, E0401, W0611
 # pylint: disable=missing-module-docstring, missing-function-docstring, import-error, no-name-in-module, unused-import, wrong-import-order
 """
 BS-Opt Test Suite

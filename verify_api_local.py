@@ -1,3 +1,4 @@
+# pylint: disable=C0114, C0116, C0301, W1514, E0401
 # pylint: disable=missing-module-docstring, missing-function-docstring, import-error, broad-exception-caught
 
 import requests

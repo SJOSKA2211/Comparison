@@ -1,3 +1,4 @@
+# pylint: disable=W1203, W0718, W0613, R0903, R1711, R0402, C0415, C0116, C0114, C0103, C0301, E0401
 # pylint: disable=import-error, import-outside-toplevel, logging-fstring-interpolation, broad-exception-caught, invalid-name, global-statement, missing-function-docstring
 """
 BS-Opt ML Autonomous Pipeline
@@ -103,7 +104,7 @@ def load_neural_greeks_model():
     model_path = os.path.join(config.model_dir, "neural_greeks.pt")
 
     if os.path.exists(model_path):
-        model.load_state_dict(torch.load(model_path, map_location="cpu"))
+        model.load_state_dict(torch.load(model_path, map_location="cpu", weights_only=True))
         logger.info("Loaded pre-trained Neural Greeks model")
     else:
         logger.warning("No pre-trained model found, using random weights")

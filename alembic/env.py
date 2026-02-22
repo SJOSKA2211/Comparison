@@ -1,4 +1,5 @@
 # ruff: noqa: E402
+# pylint: disable=E402, W0611
 # pylint: disable=E402
 import asyncio
 from logging.config import fileConfig

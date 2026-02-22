@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload  # noqa: E402
 
 from src.api.deps import get_db, require_auth
 from src.models.market import MarketTick

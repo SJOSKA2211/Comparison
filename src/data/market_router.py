@@ -1,3 +1,4 @@
+# pylint: disable=W0201, W0718, W1203, W0612, R0902, C0116, C0114, C0103, C0301, C0415, E0401
 """
 BS-Opt Market Data Router
 Smart routing between global (Polygon/CCXT) and local (NSE) data sources

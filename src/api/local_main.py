@@ -217,9 +217,9 @@ async def register_user(user: UserCreate, db=Depends(get_db)):
 
     # Create session
     token = secrets.token_urlsafe(32)
-    expires_at = "datetime('now', '+24 hours')"
+
     await db.execute(
-        f"INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, {expires_at})",  # nosec B608,
+         "INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, datetime('now', '+24 hours'))",  # nosec B608,
         (user_id, token)
     )
     await db.commit()

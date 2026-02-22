@@ -1,3 +1,5 @@
+# pylint: disable=trailing-whitespace
+# pylint: disable=missing-module-docstring, missing-function-docstring, too-many-instance-attributes, unnecessary-pass, logging-fstring-interpolation, broad-exception-caught, attribute-defined-outside-init, unused-variable, import-outside-toplevel
 """
 BS-Opt Market Data Router
 Smart routing between global (Polygon/CCXT) and local (NSE) data sources

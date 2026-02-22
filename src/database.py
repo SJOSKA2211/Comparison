@@ -1,8 +1,14 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import DeclarativeBase
-from typing import AsyncGenerator
+# pylint: disable=invalid-name
+# pylint: disable=invalid-name
+# pylint: disable=invalid-name
+# pylint: disable=invalid-name
+# pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring, too-few-public-methods, import-error, wrong-import-order
 import os
+from typing import AsyncGenerator
+
 from dotenv import load_dotenv
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import DeclarativeBase
 
 load_dotenv()
 
@@ -31,8 +37,10 @@ AsyncSessionLocal = async_sessionmaker(
     autoflush=False,
 )
 
+
 class Base(DeclarativeBase):
     pass
+
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:

@@ -51,7 +51,7 @@ _db_connection = None
 async def get_db():
     """Get SQLite database connection"""
     import aiosqlite
-    
+
     async with aiosqlite.connect(DATABASE_PATH) as db:
         db.row_factory = aiosqlite.Row
         yield db
@@ -114,19 +114,19 @@ async def get_current_user(request: Request, db=Depends(get_db)) -> dict | None:
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return None
-    
+
     token = auth_header[7:]
-    
+
     cursor = await db.execute(
-        """SELECT u.id, u.email, u.role, u.email_verified 
-           FROM sessions s JOIN users u ON s.user_id = u.id 
+        """SELECT u.id, u.email, u.role, u.email_verified
+           FROM sessions s JOIN users u ON s.user_id = u.id
            WHERE s.token = ? AND datetime(s.expires_at) > datetime('now')""",
         (token,)
     )
     row = await cursor.fetchone()
-    
+
     if row:
-        return {"user_id": row["id"], "email": row["email"], 
+        return {"user_id": row["id"], "email": row["email"],
                 "user_role": row["role"], "email_verified": row["email_verified"]}
     return None
 
@@ -197,11 +197,11 @@ async def readiness_check(db=Depends(get_db)):
 async def register_user(user: UserCreate, db=Depends(get_db)):
     """Register with email/password"""
     import hashlib
-    
+
     # Simple password hash for dev
     password_hash = hashlib.sha256(user.password.encode()).hexdigest()
     user_id = secrets.token_hex(16)
-    
+
     try:
         await db.execute(
             "INSERT INTO users (id, email, password_hash, role) VALUES (?, ?, ?, ?)",
@@ -212,7 +212,7 @@ async def register_user(user: UserCreate, db=Depends(get_db)):
         if "UNIQUE" in str(e):
             raise HTTPException(status_code=409, detail="Email already registered")
         raise
-    
+
     # Create session
     token = secrets.token_urlsafe(32)
     expires_at = "datetime('now', '+24 hours')"
@@ -221,7 +221,7 @@ async def register_user(user: UserCreate, db=Depends(get_db)):
         (user_id, token)
     )
     await db.commit()
-    
+
     return TokenResponse(
         access_token=token,
         userate=UserResponse(id=user_id, email=user.email, role=user.role)
@@ -232,18 +232,18 @@ async def register_user(user: UserCreate, db=Depends(get_db)):
 async def login(credentials: LoginRequest, db=Depends(get_db)):
     """Login with email/password"""
     import hashlib
-    
+
     password_hash = hashlib.sha256(credentials.password.encode()).hexdigest()
-    
+
     cursor = await db.execute(
         "SELECT id, email, role, email_verified FROM users WHERE email = ? AND password_hash = ?",
         (credentials.email, password_hash)
     )
     row = await cursor.fetchone()
-    
+
     if not row:
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
+
     # Create session
     token = secrets.token_urlsafe(32)
     await db.execute(
@@ -251,7 +251,7 @@ async def login(credentials: LoginRequest, db=Depends(get_db)):
         (row["id"], token)
     )
     await db.commit()
-    
+
     return TokenResponse(
         access_token=token,
         userate=UserResponse(id=row["id"], email=row["email"],
@@ -278,15 +278,15 @@ async def get_me(user: dict = Depends(require_auth)):
 async def price_option(request: PricingRequest, user: dict = Depends(require_auth)):
     """Calculate option price with Black-Scholes"""
     start_time = time.perf_counter_ns()
-    
+
     from src.pricing.numerical_methods import black_scholes_price
-    
+
     result = black_scholes_price(
         spot=request.spot, strike=request.strike, rate=request.rate,
         volatility=request.volatility, time_to_maturity=request.time_to_maturity,
         option_type=request.option_type,
     )
-    
+
     return PricingResponse(
         **result,
         computation_time_us=(time.perf_counter_ns() - start_time) // 1000,
@@ -297,14 +297,14 @@ async def price_option(request: PricingRequest, user: dict = Depends(require_aut
 async def compare_methods(request: PricingRequest, user: dict = Depends(require_auth)):
     """Compare all pricing methods"""
     from src.pricing.numerical_methods import NumericalMethodComparator
-    
+
     comparator = NumericalMethodComparator()
     results = comparator.compare_all(
         spot=request.spot, strike=request.strike, rate=request.rate,
         volatility=request.volatility, time_to_maturity=request.time_to_maturity,
         option_type=request.option_type,
     )
-    
+
     return results
 
 
@@ -316,7 +316,7 @@ async def compare_methods(request: PricingRequest, user: dict = Depends(require_
 async def get_demo_price(symbol: str):
     """Get a demo price for testing (no auth required)"""
     import random
-    
+
     prices = {
         "AAPL": 185.0,
         "GOOGL": 140.0,
@@ -324,10 +324,10 @@ async def get_demo_price(symbol: str):
         "SAFCOM": 25.0,  # Safaricom (NSE Kenya)
         "EQTY": 45.0,    # Equity Bank (NSE Kenya)
     }
-    
+
     base_price = prices.get(symbol.upper(), 100.0)
     current_price = base_price * (1 + random.uniform(-0.02, 0.02))
-    
+
     return {
         "symbol": symbol.upper(),
         "price": round(current_price, 2),

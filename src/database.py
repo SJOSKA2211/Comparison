@@ -2,9 +2,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.orm import DeclarativeBase
 from typing import AsyncGenerator
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///data/bsopt.db")
 

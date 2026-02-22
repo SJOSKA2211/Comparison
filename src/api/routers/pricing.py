@@ -1,3 +1,5 @@
+"""Option Pricing API Router"""
+
 from typing import List
 
 from fastapi import APIRouter, Depends
@@ -11,6 +13,7 @@ from src.models.market import NumericalExperiment
 from src.pricing.numerical_methods import NumericalMethodComparator, black_scholes_price
 
 router = APIRouter(prefix="/pricing", tags=["Pricing"])
+"""Request model for option pricing."""
 
 
 class PricingRequest(BaseModel):
@@ -18,8 +21,10 @@ class PricingRequest(BaseModel):
     strike: float = Field(gt=0)
     rate: float = Field(ge=0, le=1)
     volatility: float = Field(gt=0, le=5)
-    time_to_maturity: float = Field(gt=0)
     option_type: str = Field(pattern="^(call|put)$")
+
+
+"""Response model for option pricing."""
 
 
 class PricingResponse(BaseModel):

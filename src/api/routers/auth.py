@@ -1,3 +1,5 @@
+"""Authentication API Router"""
+
 import secrets
 from datetime import datetime, timedelta
 from uuid import UUID

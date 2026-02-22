@@ -1,7 +1,4 @@
-"""
-BS-Opt Local Development API
-Simplified version using SQLite for local development
-"""
+"""Local Development Entry Point"""
 
 from __future__ import annotations
 

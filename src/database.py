@@ -1,3 +1,5 @@
+"""Database Configuration and Session Management"""
+
 import os
 from typing import AsyncGenerator
 
@@ -34,10 +36,13 @@ AsyncSessionLocal = async_sessionmaker(
 
 
 class Base(DeclarativeBase):
+    """SQLAlchemy Base Model"""
+
     pass
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """Get a database session."""
     async with AsyncSessionLocal() as session:
         try:
             yield session

@@ -1,3 +1,4 @@
+# pylint: disable=import-error
 """Feature Engineering Module"""
 
 import numpy as np

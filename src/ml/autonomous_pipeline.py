@@ -1,3 +1,4 @@
+# pylint: disable=import-error, import-outside-toplevel
 """
 BS-Opt ML Autonomous Pipeline
 Ray-based training and inference worker
@@ -99,20 +100,19 @@ def load_neural_greeks_model():
                 nn.Linear(64, 6),  # [price, delta, gamma, theta, vega, rho]
             )
 
-        def forward(self, x):
-            return self.net(x)
+    def load_neural_greeks_model(self):
+        """Initialize the autonomous pipeline."""
+        model = NeuralGreeksNet()
+        model_path = os.path.join(config.model_dir, "neural_greeks.pt")
 
-    model = NeuralGreeksNet()
-    model_path = os.path.join(config.model_dir, "neural_greeks.pt")
+        if os.path.exists(model_path):
+            model.load_state_dict(torch.load(model_path, map_location="cpu", weights_only=True))
+            logger.info("Loaded pre-trained Neural Greeks model")
+        else:
+            logger.warning("No pre-trained model found, using random weights")
 
-    if os.path.exists(model_path):
-        model.load_state_dict(torch.load(model_path, map_location="cpu", weights_only=True))
-        logger.info("Loaded pre-trained Neural Greeks model")
-    else:
-        logger.warning("No pre-trained model found, using random weights")
-
-    model.eval()
-    return model
+        model.eval()
+        return model
 
 
 def load_tft_model():
@@ -120,10 +120,6 @@ def load_tft_model():
     # Placeholder - would use pytorch-forecasting in production
     logger.info("TFT model loading (placeholder)")
     return None
-
-
-def load_finbert_model():
-    """Load FinBERT for sentiment analysis"""
     # Placeholder - would use transformers in production
     logger.info("FinBERT model loading (placeholder)")
     return None
@@ -265,3 +261,9 @@ def run_pipeline():
 
 if __name__ == "__main__":
     run_pipeline()
+
+
+def load_finbert_model():
+    """Load FinBERT model for sentiment analysis"""
+    logger.info("FinBERT model loading (placeholder)")
+    return None

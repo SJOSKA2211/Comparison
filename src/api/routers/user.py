@@ -1,3 +1,5 @@
+"""User Management API Router"""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,6 +10,8 @@ from src.models.user import User
 from src.schemas.auth import UserResponse
 
 router = APIRouter(prefix="/users", tags=["Users"])
+
+"""Get current user details."""
 
 
 @router.get("/profile", response_model=UserResponse)

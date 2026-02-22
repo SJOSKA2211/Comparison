@@ -1,3 +1,5 @@
+# ruff: noqa: E722
+# pylint: disable=bare-except
 import socket
 
 

@@ -7,7 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.api.deps import get_db, require_auth
-from src.database import get_db
 from src.models.market import MarketTick
 from src.models.trading import Order, OrderStatus, Portfolio, Position, Watchlist
 from src.schemas.trading import (

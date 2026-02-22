@@ -1,3 +1,5 @@
+# ruff: noqa: F401
+# pylint: disable=unused-import
 import sys
 
 with open("diagnosis.txt", "w") as f:

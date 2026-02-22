@@ -1,3 +1,4 @@
+# ruff: noqa: W293
 # pylint: disable=invalid-name, too-many-arguments, too-many-positional-arguments, too-many-locals, no-else-return, import-error
 # ruff: noqa: N803, N806
 """
@@ -114,7 +115,6 @@ def crank_nicolson_price(
         S_max = 4 * K
 
     dt = T / N
-    dS = S_max / M
 
     # Grid
     S_grid = np.linspace(0, S_max, M + 1)

@@ -114,8 +114,8 @@ async def get_current_user(request: Request, db=Depends(get_db)) -> dict | None:
     token = auth_header[7:]
 
     cursor = await db.execute(
-        """SELECT u.id, u.email, u.role, u.email_verified 
-           FROM sessions s JOIN users u ON s.user_id = u.id 
+        """SELECT u.id, u.email, u.role, u.email_verified
+           FROM sessions s JOIN users u ON s.user_id = u.id
            WHERE s.token = ? AND datetime(s.expires_at) > datetime('now')""",
         (token,)
     )

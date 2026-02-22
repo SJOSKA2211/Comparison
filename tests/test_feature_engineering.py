@@ -3,7 +3,6 @@ BS-Opt Test Suite
 Tests for ML feature engineering
 """
 
-import pytest
 import pandas as pd
 import numpy as np
 from src.ml.feature_engineering import calculate_technical_indicators, generate_signals
@@ -65,11 +64,6 @@ class TestTechnicalIndicators:
         result = calculate_technical_indicators(df)
 
         # RSI should be 100 (or very close to it depending on implementation details of initial window)
-        # With standard RSI, if there are only gains, RSI -> 100.
-        # The implementation uses rolling mean of gains/losses.
-        # Loss will be 0. Division by zero might occur or result in inf.
-        # If loss is 0, rs is inf, 100 / (1+inf) is 0, so RSI is 100.
-
         # Check last value
         assert result['rsi'].iloc[-1] == 100.0
 

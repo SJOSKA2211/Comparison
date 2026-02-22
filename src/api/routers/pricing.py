@@ -2,13 +2,13 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from pydantic import BaseModel, Field
 
 from src.database import get_db
 from src.api.deps import require_auth
 from src.schemas.auth import UserResponse # Reuse or create specific one
 from src.pricing.numerical_methods import black_scholes_price, NumericalMethodComparator
 from src.models.market import NumericalExperiment
-from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/pricing", tags=["Pricing"])
 
@@ -37,8 +37,8 @@ async def price_option(request: PricingRequest, user: dict = Depends(require_aut
     start_time = time.perf_counter_ns()
     
     result = black_scholes_price(
-        S=request.spot, K=request.strike, r=request.rate,
-        sigma=request.volatility, T=request.time_to_maturity,
+        spot=request.spot, strike=request.strike, rate=request.rate,
+        sigma=request.volatility, time_to_maturity=request.time_to_maturity,
         option_type=request.option_type,
     )
     
@@ -56,8 +56,8 @@ async def compare_methods(
     """Compare all numerical methods and persist experiment"""
     comparator = NumericalMethodComparator()
     results = comparator.compare_all(
-        S=request.spot, K=request.strike, r=request.rate,
-        sigma=request.volatility, T=request.time_to_maturity,
+        spot=request.spot, strike=request.strike, rate=request.rate,
+        sigma=request.volatility, time_to_maturity=request.time_to_maturity,
         option_type=request.option_type
     )
     

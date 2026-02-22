@@ -1,10 +1,17 @@
+"""
+Trading schemas.
+"""
 from datetime import datetime
-from uuid import UUID
 from typing import List, Optional
-from pydantic import BaseModel, Field, ConfigDict
-from src.models.trading import OrderSide, OrderType, OrderStatus
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
+
+from src.models.trading import OrderSide, OrderStatus, OrderType
+
 
 class PositionResponse(BaseModel):
+    """Position response schema"""
     id: UUID
     portfolio_id: UUID
     symbol: str
@@ -16,7 +23,9 @@ class PositionResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class OrderCreate(BaseModel):
+    """Order creation schema"""
     portfolio_id: UUID
     symbol: str
     side: OrderSide
@@ -24,7 +33,9 @@ class OrderCreate(BaseModel):
     quantity: float = Field(gt=0)
     price: Optional[float] = Field(None, gt=0)
 
+
 class OrderResponse(BaseModel):
+    """Order response schema"""
     id: UUID
     portfolio_id: UUID
     symbol: str
@@ -40,11 +51,15 @@ class OrderResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class PortfolioCreate(BaseModel):
+    """Portfolio creation schema"""
     name: str = "Main Portfolio"
     currency: str = "USD"
 
+
 class PortfolioResponse(BaseModel):
+    """Portfolio response schema"""
     id: UUID
     user_id: UUID
     name: str
@@ -56,14 +71,20 @@ class PortfolioResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class WatchlistCreate(BaseModel):
+    """Watchlist creation schema"""
     name: str
     symbols: List[str] = []
 
+
 class WatchlistUpdate(BaseModel):
+    """Watchlist update schema"""
     symbols: List[str]
 
+
 class WatchlistResponse(BaseModel):
+    """Watchlist response schema"""
     id: UUID
     user_id: UUID
     name: str

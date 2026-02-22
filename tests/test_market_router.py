@@ -1,8 +1,8 @@
 """
 Tests for MarketDataRouter logic
 """
-import pytest
-from src.data.market_router import MarketDataRouter, Exchange
+from src.data.market_router import Exchange, MarketDataRouter
+
 
 class TestMarketRouterRouting:
     """Tests for symbol routing logic"""

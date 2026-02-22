@@ -1,7 +1,9 @@
 import os
 import sqlite3
+
 import pytest
 from fastapi.testclient import TestClient
+
 import src.api.local_main
 
 # Use a unique DB name for testing to avoid conflicts

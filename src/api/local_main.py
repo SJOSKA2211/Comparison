@@ -249,7 +249,7 @@ async def login(credentials: LoginRequest, db=Depends(get_db)):
     # Create session
     token = secrets.token_urlsafe(32)
     await db.execute(
-        "INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, datetime('now', '+24 hours'))",
+        "INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, datetime('now', '+24 hours'))",  # nosec B608,
         (row["id"], token)
     )
     await db.commit()

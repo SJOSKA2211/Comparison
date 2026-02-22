@@ -3,17 +3,18 @@ from datetime import datetime, timedelta
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
 
-from src.database import get_db
 from src.api.deps import get_current_user
-from src.api.utils import get_password_hash, verify_password, get_token_hash
-from src.models.user import User, Session as UserSession, UserRole, OAuthProvider
+from src.api.utils import get_password_hash, get_token_hash, verify_password
+from src.database import get_db
 from src.models.trading import Portfolio
-from src.schemas.auth import UserCreate, TokenResponse, LoginRequest, UserResponse
+from src.models.user import OAuthProvider, Session as UserSession, User, UserRole
+from src.schemas.auth import LoginRequest, TokenResponse, UserCreate, UserResponse
+
+# pylint: disable=unused-import
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 

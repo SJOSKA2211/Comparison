@@ -6,17 +6,21 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.database import get_db
-from src.models.trading import Portfolio, Position, Order, Watchlist, OrderStatus
-from src.models.market import MarketTick
-from src.schemas.trading import (
-    PortfolioCreate, PortfolioResponse,
-    OrderCreate, OrderResponse,
-    WatchlistCreate, WatchlistUpdate, WatchlistResponse,
-)
 from src.api.deps import require_auth
-# Remove local get_current_user_id and use dependency directly in endpoints if possible,
-# or keep a wrapper that returns UUID.
+from src.database import get_db
+from src.models.market import MarketTick
+from src.models.trading import Order, OrderStatus, Portfolio, Position, Watchlist
+from src.schemas.trading import (
+    OrderCreate,
+    OrderResponse,
+    PortfolioCreate,
+    PortfolioResponse,
+    WatchlistCreate,
+    WatchlistResponse,
+    WatchlistUpdate,
+)
+
+# pylint: disable=unused-import
 
 router = APIRouter(prefix="/trading", tags=["Trading"])
 

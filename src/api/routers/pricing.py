@@ -2,14 +2,16 @@ import time
 from typing import List
 
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, Field
 
-from src.database import get_db
 from src.api.deps import require_auth
-from src.pricing.numerical_methods import black_scholes_price, NumericalMethodComparator
+from src.database import get_db
 from src.models.market import NumericalExperiment
+from src.pricing.numerical_methods import NumericalMethodComparator, black_scholes_price
+
+# pylint: disable=unused-import
 
 router = APIRouter(prefix="/pricing", tags=["Pricing"])
 

@@ -46,9 +46,8 @@ def black_scholes_price(
         if option_type == "call":
             return {"price": max(S - K, 0), "delta": 1 if S > K else 0,
                     "gamma": 0, "theta": 0, "vega": 0, "rho": 0}
-        else:
-            return {"price": max(K - S, 0), "delta": -1 if S < K else 0,
-                    "gamma": 0, "theta": 0, "vega": 0, "rho": 0}
+        return {"price": max(K - S, 0), "delta": -1 if S < K else 0,
+                "gamma": 0, "theta": 0, "vega": 0, "rho": 0}
 
     sqrt_T = math.sqrt(T)
     d1 = (math.log(S / K) + (r + 0.5 * sigma**2) * T) / (sigma * sqrt_T)

@@ -1,19 +1,18 @@
 import secrets
 from datetime import datetime, timedelta
-from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
 
-from src.database import get_db
 from src.api.deps import get_current_user
 from src.api.utils import get_password_hash, verify_password
-from src.models.user import User, Session as UserSession, UserRole, OAuthProvider
+from src.database import get_db
 from src.models.trading import Portfolio
-from src.schemas.auth import UserCreate, TokenResponse, LoginRequest, UserResponse
+from src.models.user import OAuthProvider, User, UserRole
+from src.models.user import Session as UserSession
+from src.schemas.auth import LoginRequest, TokenResponse, UserCreate, UserResponse
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -49,7 +48,7 @@ async def register(user_in: UserCreate, request: Request, db: AsyncSession = Dep
     result = await db.execute(select(User).where(User.email == user_in.email))
     if result.scalars().first():
         raise HTTPException(status_code=400, detail="User already exists")
-    
+
     new_user = User(
         email=user_in.email,
         password_hash=get_password_hash(user_in.password),
@@ -59,13 +58,13 @@ async def register(user_in: UserCreate, request: Request, db: AsyncSession = Dep
     )
     db.add(new_user)
     await db.flush() # Get user_id
-    
+
     # Feature Upgrade: Auto-create portfolio
     await ensure_default_portfolio(db, new_user.id)
-    
+
     token = await create_user_session(db, new_user.id, request)
     await db.commit()
-    
+
     return {
         "access_token": token,
         "token_type": "bearer",
@@ -76,21 +75,21 @@ async def register(user_in: UserCreate, request: Request, db: AsyncSession = Dep
 async def login(login_in: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == login_in.email))
     user = result.scalars().first()
-    
+
     if not user or not user.password_hash or not verify_password(login_in.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
+
     if not user.is_active:
         raise HTTPException(status_code=403, detail="Account disabled")
-    
+
     user.last_login = datetime.utcnow()
     token = await create_user_session(db, user.id, request)
-    
+
     # Ensure portfolio (even for existing users migrating)
     await ensure_default_portfolio(db, user.id)
-    
+
     await db.commit()
-    
+
     return {
         "access_token": token,
         "token_type": "bearer",
@@ -102,7 +101,7 @@ async def login(login_in: LoginRequest, request: Request, db: AsyncSession = Dep
 async def get_me(user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    
+
     result = await db.execute(select(User).where(User.id == user["user_id"]))
     db_user = result.scalars().first()
     return db_user

@@ -9,16 +9,14 @@ from alembic import context
 
 # Import your models here
 from src.database import Base
-from src.models.user import User
-from src.models.market import MarketTick, OptionGreek, NumericalExperiment
-from src.models.trading import Portfolio, Position, Order, Watchlist
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 # Overwrite the sqlalchemy.url in the config object with the one from our app settings
-from src.database import DATABASE_URL
+from src.database import DATABASE_URL  # noqa: E402
+
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 # Interpret the config file for Python logging.

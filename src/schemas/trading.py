@@ -1,8 +1,13 @@
+"""Trading Schemas"""
+
 from datetime import datetime
-from uuid import UUID
 from typing import List, Optional
-from pydantic import BaseModel, Field, ConfigDict
-from src.models.trading import OrderSide, OrderType, OrderStatus
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
+
+from src.models.trading import OrderSide, OrderStatus, OrderType
+
 
 class PositionResponse(BaseModel):
     id: UUID
@@ -16,6 +21,7 @@ class PositionResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class OrderCreate(BaseModel):
     portfolio_id: UUID
     symbol: str
@@ -23,6 +29,7 @@ class OrderCreate(BaseModel):
     order_type: OrderType = OrderType.MARKET
     quantity: float = Field(gt=0)
     price: Optional[float] = Field(None, gt=0)
+
 
 class OrderResponse(BaseModel):
     id: UUID
@@ -40,9 +47,11 @@ class OrderResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class PortfolioCreate(BaseModel):
     name: str = "Main Portfolio"
     currency: str = "USD"
+
 
 class PortfolioResponse(BaseModel):
     id: UUID
@@ -56,12 +65,15 @@ class PortfolioResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class WatchlistCreate(BaseModel):
     name: str
     symbols: List[str] = []
 
+
 class WatchlistUpdate(BaseModel):
     symbols: List[str]
+
 
 class WatchlistResponse(BaseModel):
     id: UUID

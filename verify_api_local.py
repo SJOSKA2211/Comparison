@@ -9,12 +9,9 @@ base_url = "http://127.0.0.1:8000"
 
 def check_health():
     try:
+        # Health check
         resp = requests.get(f"{base_url}/health", timeout=2)
-        print(f"Health: {resp.status_code} {resp.json()}")
-        return True
-    except Exception as e:
-        print(f"Health check failed: {e}")
-        return False
+        print(f"Health Check: {resp.status_code} {resp.json()}")
 
 
 def test_pricing():
@@ -38,11 +35,13 @@ def test_pricing():
         }
         resp = requests.post(f"{base_url}/auth/register", json=reg_data, timeout=2)
         if resp.status_code == 409:
+            print("User already exists, logging in...")
             login_data = {"email": "test_integration@example.com", "password": "password123"}
             resp = requests.post(f"{base_url}/auth/login", json=login_data, timeout=2)
 
         if resp.status_code == 200:
             token = resp.json().get("access_token")
+            print("Auth successful")
             headers = {"Authorization": f"Bearer {token}"}
             price_resp = requests.post(
                 f"{base_url}/pricing/black-scholes", json=data, headers=headers, timeout=2
@@ -56,5 +55,4 @@ def test_pricing():
 
 
 if __name__ == "__main__":
-    if check_health():
-        test_pricing()
+    test_api()

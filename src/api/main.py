@@ -6,6 +6,10 @@ Modernized with SQLAlchemy 2.0 and Modular Routers
 
 from __future__ import annotations
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 import os
 import secrets
 import time

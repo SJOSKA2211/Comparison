@@ -1,8 +1,14 @@
+# pylint: disable=missing-function-docstring, redefined-outer-name, unused-argument
 """
 BS-Opt API Gateway (Refactored)
 Modernized with SQLAlchemy 2.0 and Modular Routers
 """
+
 from __future__ import annotations
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 import os
 import secrets
@@ -24,8 +30,10 @@ logger = structlog.get_logger()
 # Configuration
 # =============================================================================
 
+
 class Settings(BaseModel):
     """Application settings"""
+
     database_url: str = Field(default="postgresql://localhost/bsopt")
     redis_url: str = Field(default="redis://localhost:6379/0")
     environment: str = Field(default="development")
@@ -39,6 +47,7 @@ class Settings(BaseModel):
     # URLs
     frontend_url: str = Field(default="http://localhost:3000")
     api_url: str = Field(default="http://localhost:8000")
+
 
 settings = Settings(
     database_url=os.getenv("DATABASE_URL", "postgresql://localhost/bsopt"),
@@ -56,12 +65,14 @@ settings = Settings(
 # Lifespan
 # =============================================================================
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting BS-Opt API (SQLAlchemy Mode)", environment=settings.environment)
     yield
     # Close SQLAlchemy engine
     await engine.dispose()
+
 
 # =============================================================================
 # Application Setup
@@ -84,6 +95,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     request_id = request.headers.get("X-Request-ID", secrets.token_hex(8))
@@ -96,6 +108,7 @@ async def log_requests(request: Request, call_next):
 
     response.headers["X-Request-ID"] = request_id
     return response
+
 
 # =============================================================================
 # Routers
@@ -110,15 +123,17 @@ app.include_router(user.router, prefix="/api")
 # Health Check
 # =============================================================================
 
+
 @app.get("/api/health", tags=["Health"])
 async def health_check():
     return {
         "status": "healthy",
         "environment": settings.environment,
         "version": "2.0.0",
-        "timestamp": time.time()
+        "timestamp": time.time(),
     }
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("src.api.main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("src.api.main:app", host="0.0.0.0", port=8000, reload=True)  # nosec B104

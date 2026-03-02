@@ -1,6 +1,4 @@
 # ruff: noqa: E402
-# pylint: disable=E402, W0611
-# pylint: disable=E402
 import asyncio
 from logging.config import fileConfig
 
@@ -11,14 +9,13 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 # Import your models here
-from src.database import Base
+from src.database import DATABASE_URL, Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 # Overwrite the sqlalchemy.url in the config object with the one from our app settings
-from src.database import DATABASE_URL
 
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 

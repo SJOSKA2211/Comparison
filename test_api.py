@@ -1,5 +1,3 @@
-# pylint: disable=C0114, C0116, C0301, W1514, W0311
-# pylint: disable=missing-module-docstring, missing-function-docstring, import-error, broad-exception-caught
 import sys
 
 import requests
@@ -31,11 +29,14 @@ def test_api():
                 "spot": 100, "strike": 100, "rate": 0.05,
                 "volatility": 0.2, "time_to_maturity": 1, "option_type": "call"
             }
-            resp = requests.post(f"{base_url}/pricing/black-scholes", json=price_data, headers=headers, timeout=10)
+            resp = requests.post(
+                f"{base_url}/pricing/black-scholes", json=price_data, headers=headers, timeout=10
+            )
             print(f"Pricing: {resp.status_code} {resp.json().get('price')}")
 
     except Exception as e:
         print(f"Error: {e}")
+
 
 if __name__ == "__main__":
     with open("api_test_results.txt", "w") as f:

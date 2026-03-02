@@ -1,7 +1,8 @@
-
+"""
+Feature engineering module for calculating technical indicators.
+"""
 import numpy as np
 import pandas as pd
-
 
 def calculate_technical_indicators(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate basic technical indicators for trading research"""

@@ -96,26 +96,26 @@ class TestCrankNicolson:
     def test_accuracy_vs_analytical_call(self):
         """FDM should match analytical within tolerance"""
         analytical = black_scholes_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call")
-        fdm = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", grid_steps=200)
-
+        fdm = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", asset_steps=200)
+        
         error_pct = abs(fdm["price"] - analytical["price"]) / analytical["price"] * 100
         assert error_pct < TOLERANCE_PCT
 
     def test_accuracy_vs_analytical_put(self):
         """FDM put should match analytical"""
         analytical = black_scholes_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "put")
-        fdm = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "put", grid_steps=200)
-
+        fdm = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "put", asset_steps=200)
+        
         error_pct = abs(fdm["price"] - analytical["price"]) / analytical["price"] * 100
         assert error_pct < TOLERANCE_PCT
 
     def test_grid_convergence(self):
         """Finer grid should give more accurate result"""
         analytical = black_scholes_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call")
-
-        coarse = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", grid_steps=50)
-        fine = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", grid_steps=200)
-
+        
+        coarse = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", asset_steps=50)
+        fine = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", asset_steps=200)
+        
         coarse_error = abs(coarse["price"] - analytical["price"])
         fine_error = abs(fine["price"] - analytical["price"])
 
@@ -165,8 +165,8 @@ class TestTrinomialTree:
     def test_accuracy_vs_analytical(self):
         """Tree should match analytical within tolerance"""
         analytical = black_scholes_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call")
-        tree = trinomial_tree_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", time_steps=200)
-
+        tree = trinomial_tree_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", steps=200)
+        
         error_pct = abs(tree["price"] - analytical["price"]) / analytical["price"] * 100
         assert error_pct < TOLERANCE_PCT
 
@@ -175,10 +175,10 @@ class TestTrinomialTree:
         analytical = black_scholes_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call")
 
         no_richardson = trinomial_tree_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call",
-                                             time_steps=100, use_richardson=False)
+                                             steps=100, use_richardson=False)
         with_richardson = trinomial_tree_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call",
-                                               time_steps=100, use_richardson=True)
-
+                                               steps=100, use_richardson=True)
+        
         error_no = abs(no_richardson["price"] - analytical["price"])
         error_with = abs(with_richardson["price"] - analytical["price"])
 

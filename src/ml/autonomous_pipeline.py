@@ -52,7 +52,7 @@ def init_ray():
         # pylint: disable=import-outside-toplevel
         import ray
 
-        logger.info("Connecting to Ray cluster at %s", config.ray_address)
+        logger.info(f"Connecting to Ray cluster at {config.ray_address}")
         ray.init(address=config.ray_address, ignore_reinit_error=True)
         _ray_initialized = True
         logger.info("Ray initialized successfully")
@@ -61,7 +61,7 @@ def init_ray():
 def get_model(name: str) -> Any:
     """Lazy load ML models"""
     if name not in _models:
-        logger.info("Loading model: %s", name)
+        logger.info(f"Loading model: {name}")
 
         if name == "neural_greeks":
             _models[name] = load_neural_greeks_model()
@@ -147,9 +147,9 @@ def create_pricing_task():
         results = []
         for opt in options_batch:
             result = black_scholes_price(
-                spot=opt["spot"],
-                strike=opt["strike"],
-                rate=opt["rate"],
+                spot_price=opt["spot"],
+                strike_price=opt["strike"],
+                risk_free_rate=opt["rate"],
                 volatility=opt["volatility"],
                 time_to_maturity=opt["time_to_maturity"],
                 option_type=opt.get("option_type", "call"),
@@ -175,13 +175,13 @@ def create_training_task():
             self.cash = 100000
             self.history = []
 
-        def get_action(self, _state: dict) -> str:
+        def get_action(self, state: dict) -> str:
             """Placeholder for RL policy"""
             # State: [price, sentiment, greeks]
             # Action: buy, sell, hold
             return "hold"
 
-        def train_step(self, _batch: List[dict]) -> dict:
+        def train_step(self, batch: list[dict]) -> dict:
             """Single training step"""
             return {"loss": 0.0, "reward": 0.0}
 
@@ -196,6 +196,7 @@ async def consume_market_data():
     """Consume market data from Kafka and trigger ML predictions"""
     # pylint: disable=import-outside-toplevel
     from aiokafka import AIOKafkaConsumer
+    import json
 
     consumer = AIOKafkaConsumer(
         "market-ticks",
@@ -210,7 +211,7 @@ async def consume_market_data():
     try:
         async for msg in consumer:
             tick = msg.value
-            logger.debug("Received tick: %s @ %s", tick['symbol'], tick['price'])
+            logger.debug(f"Received tick: {tick['symbol']} @ {tick['price']}")
 
             # Trigger ML inference if needed
             # This would feed into the RL agent or forecaster
@@ -238,11 +239,13 @@ def run_pipeline():
         import mlflow
         mlflow.set_tracking_uri(config.mlflow_uri)
         mlflow.set_experiment("bsopt-production")
-        logger.info("MLflow tracking: %s", config.mlflow_uri)
-    except Exception as e: # pylint: disable=broad-exception-caught
-        logger.warning("MLflow not available: %s", e)
+        logger.info(f"MLflow tracking: {config.mlflow_uri}")
+    except Exception as e:
+        logger.warning(f"MLflow not available: {e}")
 
     # Run event loop for Kafka consumer
+    import asyncio
+
     async def main_loop():
         """Main async loop"""
         logger.info("Starting main event loop")

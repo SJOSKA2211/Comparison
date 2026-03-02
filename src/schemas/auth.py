@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
+
 class UserResponse(BaseModel):
     id: UUID
     email: str

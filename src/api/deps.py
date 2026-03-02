@@ -1,20 +1,22 @@
 from datetime import datetime
-from typing import Annotated, Optional
-from uuid import UUID
+from typing import Optional
+
 from fastapi import Depends, HTTPException, Request, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db
-from src.models.user import User, Session as UserSession
+from src.models.user import Session as UserSession
+from src.models.user import User
+
 
 async def get_current_user(request: Request, db: AsyncSession = Depends(get_db)) -> Optional[dict]:
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return None
-    
+
     token = auth_header[7:]
-    
+
     # We use ORM to validate session instead of PL/pgSQL function
     # Note: In a real system we'd use hashing for the token
     result = await db.execute(
@@ -23,7 +25,7 @@ async def get_current_user(request: Request, db: AsyncSession = Depends(get_db))
         .where(UserSession.expires_at > datetime.utcnow())
     )
     session = result.scalars().first()
-    
+
     if session:
         # Load user
         user_result = await db.execute(select(User).where(User.id == session.user_id))

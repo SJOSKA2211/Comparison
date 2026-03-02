@@ -1,3 +1,4 @@
+# pylint: disable=missing-module-docstring, missing-class-docstring, too-few-public-methods, import-error
 from typing import Optional
 from uuid import UUID
 
@@ -12,15 +13,18 @@ class UserResponse(BaseModel):
     display_name: Optional[str] = None
     avatar_url: Optional[str] = None
 
+
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
 
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     expires_in: int = 86400
     user: Optional[UserResponse] = None
+
 
 class UserCreate(BaseModel):
     email: EmailStr

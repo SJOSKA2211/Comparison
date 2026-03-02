@@ -1,3 +1,5 @@
+# pylint: disable=duplicate-code
+# pylint: disable=duplicate-code
 """
 BS-Opt Test Suite
 Tests for pricing engine numerical methods
@@ -33,6 +35,7 @@ TOLERANCE_PCT = 1.0  # 1% max error
 # =============================================================================
 # Black-Scholes Analytical Tests
 # =============================================================================
+
 
 class TestBlackScholes:
     """Tests for analytical Black-Scholes pricing"""
@@ -90,6 +93,7 @@ class TestBlackScholes:
 # Finite Difference Method Tests
 # =============================================================================
 
+
 class TestCrankNicolson:
     """Tests for Crank-Nicolson FDM"""
 
@@ -126,6 +130,7 @@ class TestCrankNicolson:
 # Monte Carlo Tests
 # =============================================================================
 
+
 class TestMonteCarlo:
     """Tests for Monte Carlo pricing"""
 
@@ -159,6 +164,7 @@ class TestMonteCarlo:
 # Trinomial Tree Tests
 # =============================================================================
 
+
 class TestTrinomialTree:
     """Tests for trinomial tree pricing"""
 
@@ -190,6 +196,7 @@ class TestTrinomialTree:
 # =============================================================================
 # Comparative Analysis Tests
 # =============================================================================
+
 
 class TestNumericalMethodComparator:
     """Tests for the method comparator"""
@@ -227,6 +234,7 @@ class TestNumericalMethodComparator:
 # =============================================================================
 # Edge Cases
 # =============================================================================
+
 
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions"""

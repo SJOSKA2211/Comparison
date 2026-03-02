@@ -1,3 +1,5 @@
+# pylint: disable=missing-function-docstring, import-outside-toplevel, no-name-in-module, import-error, invalid-name
+# pylint: disable=missing-function-docstring, no-name-in-module, import-error, import-outside-toplevel
 """
 BS-Opt Test Suite
 Tests for authentication functions
@@ -15,6 +17,7 @@ from src.schemas.auth import UserCreate
 # =============================================================================
 # Test User Models
 # =============================================================================
+
 
 class TestUserModels:
     """Tests for Pydantic user models"""
@@ -39,21 +42,27 @@ class TestUserModels:
     def test_user_create_invalid_email(self):
         from src.schemas.auth import UserCreate
         from pydantic import ValidationError
-        
+
+        from src.api.main import UserCreate
+
         with pytest.raises(ValidationError):
             UserCreate(email="not-an-email", password="password123")
 
     def test_user_create_short_password(self):
         from src.schemas.auth import UserCreate
         from pydantic import ValidationError
-        
+
+        from src.api.main import UserCreate
+
         with pytest.raises(ValidationError):
             UserCreate(email="test@example.com", password="short")
 
     def test_user_create_invalid_role(self):
         from src.schemas.auth import UserCreate
         from pydantic import ValidationError
-        
+
+        from src.api.main import UserCreate
+
         with pytest.raises(ValidationError):
             UserCreate(email="test@example.com", password="password123", role="invalid")
 
@@ -61,6 +70,7 @@ class TestUserModels:
 # =============================================================================
 # Test Pricing Models
 # =============================================================================
+
 
 class TestPricingModels:
     """Tests for pricing request/response models"""
@@ -74,7 +84,7 @@ class TestPricingModels:
             rate=0.05,
             volatility=0.2,
             time_to_maturity=1.0,
-            option_type="call"
+            option_type="call",
         )
         assert req.spot == 100.0
         assert req.option_type == "call"
@@ -82,7 +92,9 @@ class TestPricingModels:
     def test_pricing_request_invalid_spot(self):
         from src.api.routers.pricing import PricingRequest
         from pydantic import ValidationError
-        
+
+        from src.api.main import PricingRequest
+
         with pytest.raises(ValidationError):
             PricingRequest(
                 spot=-100.0,  # Invalid: must be > 0
@@ -90,13 +102,15 @@ class TestPricingModels:
                 rate=0.05,
                 volatility=0.2,
                 time_to_maturity=1.0,
-                option_type="call"
+                option_type="call",
             )
 
     def test_pricing_request_invalid_option_type(self):
         from src.api.routers.pricing import PricingRequest
         from pydantic import ValidationError
-        
+
+        from src.api.main import PricingRequest
+
         with pytest.raises(ValidationError):
             PricingRequest(
                 spot=100.0,
@@ -104,13 +118,14 @@ class TestPricingModels:
                 rate=0.05,
                 volatility=0.2,
                 time_to_maturity=1.0,
-                option_type="straddle"  # Invalid
+                option_type="straddle",  # Invalid
             )
 
 
 # =============================================================================
 # Test OAuth URL Generation
 # =============================================================================
+
 
 class TestOAuthUrls:
     """Tests for OAuth URL handling"""
@@ -153,6 +168,7 @@ class TestOAuthUrls:
 # =============================================================================
 # Test Token Generation
 # =============================================================================
+
 
 class TestTokenGeneration:
     """Tests for token/secret generation"""

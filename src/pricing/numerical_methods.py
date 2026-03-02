@@ -10,6 +10,7 @@ from scipy.stats import norm
 # Analytical Solution (Black-Scholes)
 # =============================================================================
 
+
 def black_scholes_price(
     spot_price: float,
     strike_price: float,
@@ -75,6 +76,7 @@ def black_scholes_price(
 # =============================================================================
 # Finite Difference Method (Crank-Nicolson)
 # =============================================================================
+
 
 def crank_nicolson_price(
     spot_price: float,
@@ -191,6 +193,7 @@ def solve_tridiagonal(a: np.ndarray, b: np.ndarray, c: np.ndarray, d: np.ndarray
 # Monte Carlo (Antithetic Variance Reduction)
 # =============================================================================
 
+
 def monte_carlo_price(
     spot_price: float,
     strike_price: float,
@@ -243,6 +246,7 @@ def monte_carlo_price(
 # =============================================================================
 # Trinomial Tree with Richardson Extrapolation
 # =============================================================================
+
 
 def trinomial_tree_price(
     spot_price: float,
@@ -316,6 +320,7 @@ def trinomial_tree_price(
 # =============================================================================
 # Numerical Method Comparator (Research Tool)
 # =============================================================================
+
 
 @dataclass
 class NumericalMethodComparator:

@@ -1,3 +1,4 @@
+# pylint: disable=missing-function-docstring, too-few-public-methods, logging-fstring-interpolation, broad-exception-caught, invalid-name, global-statement, import-outside-toplevel, assignment-from-none, useless-return, unused-argument, import-error, no-name-in-module, consider-using-from-import, trailing-whitespace, duplicate-code
 """
 BS-Opt ML Autonomous Pipeline
 Ray-based training and inference worker
@@ -24,9 +25,11 @@ logger = logging.getLogger("ml-worker")
 # Configuration
 # =============================================================================
 
+
 @dataclass
 class MLConfig:
     """ML Worker configuration"""
+
     ray_address: str = os.getenv("RAY_ADDRESS", "auto")
     redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     kafka_servers: str = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
@@ -79,6 +82,7 @@ def get_model(name: str) -> Any:
 # Model Loaders
 # =============================================================================
 
+
 def load_neural_greeks_model():
     """Load pre-trained Neural Greeks approximation model"""
     # pylint: disable=import-outside-toplevel
@@ -87,6 +91,7 @@ def load_neural_greeks_model():
 
     class NeuralGreeksNet(nn.Module):
         """Neural network to approximate Black-Scholes Greeks"""
+
         def __init__(self):
             super().__init__()
             self.net = nn.Sequential(
@@ -133,6 +138,7 @@ def load_finbert_model():
 # =============================================================================
 # Ray Tasks
 # =============================================================================
+
 
 def create_pricing_task():
     """Create Ray remote task for pricing"""
@@ -192,6 +198,7 @@ def create_training_task():
 # Kafka Consumer
 # =============================================================================
 
+
 async def consume_market_data():
     """Consume market data from Kafka and trigger ML predictions"""
     # pylint: disable=import-outside-toplevel
@@ -224,6 +231,7 @@ async def consume_market_data():
 # Main Pipeline
 # =============================================================================
 
+
 def run_pipeline():
     """Main entry point for ML worker"""
     logger.info("=" * 60)
@@ -237,6 +245,7 @@ def run_pipeline():
     try:
         # pylint: disable=import-outside-toplevel
         import mlflow
+
         mlflow.set_tracking_uri(config.mlflow_uri)
         mlflow.set_experiment("bsopt-production")
         logger.info(f"MLflow tracking: {config.mlflow_uri}")

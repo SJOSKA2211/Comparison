@@ -1,19 +1,26 @@
 from typing import List, Optional
 from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.api.deps import get_db, require_auth
 from src.models.market import MarketTick
 from src.models.trading import Order, OrderStatus, Portfolio, Position, Watchlist
 from src.schemas.trading import (
-    PortfolioCreate, PortfolioResponse, 
-    OrderCreate, OrderResponse, 
-    WatchlistCreate, WatchlistUpdate, WatchlistResponse
+    OrderCreate,
+    OrderResponse,
+    PortfolioCreate,
+    PortfolioResponse,
+    WatchlistCreate,
+    WatchlistResponse,
+    WatchlistUpdate,
 )
-from src.api.deps import require_auth
+
+# Remove local get_current_user_id and use dependency directly in endpoints if possible,
+# or keep a wrapper that returns UUID.
 
 router = APIRouter(prefix="/trading", tags=["Trading"])
 
@@ -66,14 +73,21 @@ async def get_portfolio(
     portfolio = result.scalars().first()
     if not portfolio:
         raise HTTPException(status_code=404, detail="Portfolio not found")
-    
-    # Feature Upgrade: Fetch latest prices for positions
-    for pos in portfolio.positions:
-        tick_result = await db.execute(
-            select(MarketTick.price)
-            .where(MarketTick.symbol == pos.symbol)
-            .order_by(MarketTick.timestamp.desc())
-            .limit(1)
+
+    # Feature Upgrade: Fetch latest prices for positions (Optimized)
+    position_symbols = list({pos.symbol for pos in portfolio.positions})
+    current_prices = {}
+
+    if position_symbols:
+        # Fetch latest price for each symbol in one query
+        latest_times_subq = (
+            select(
+                MarketTick.symbol,
+                func.max(MarketTick.time).label("max_time")
+            )
+            .where(MarketTick.symbol.in_(position_symbols))
+            .group_by(MarketTick.symbol)
+            .subquery()
         )
 
         stmt = (
@@ -111,6 +125,9 @@ async def create_order(
     portfolio = portfolio_result.scalars().first()
     if not portfolio:
         raise HTTPException(status_code=404, detail="Portfolio not found")
+
+    # TODO: Validate balance for BUY orders
+    # TODO: Validate position for SELL orders
 
     new_order = Order(
         portfolio_id=order.portfolio_id,

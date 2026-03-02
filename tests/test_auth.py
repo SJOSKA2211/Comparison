@@ -20,8 +20,7 @@ class TestUserModels:
     """Tests for Pydantic user models"""
 
     def test_user_create_valid(self):
-        from src.schemas.auth import UserCreate
-        
+        """Test valid user creation"""
         user = UserCreate(
             email="test@example.com",
             password="securepassword123",
@@ -31,29 +30,22 @@ class TestUserModels:
         assert user.role == "trader"
 
     def test_user_create_default_role(self):
-        from src.schemas.auth import UserCreate
-        
+        """Test default role assignment"""
         user = UserCreate(email="test@example.com", password="password123")
         assert user.role == "trader"
 
     def test_user_create_invalid_email(self):
-        from src.schemas.auth import UserCreate
-        from pydantic import ValidationError
-        
+        """Test invalid email validation"""
         with pytest.raises(ValidationError):
             UserCreate(email="not-an-email", password="password123")
 
     def test_user_create_short_password(self):
-        from src.schemas.auth import UserCreate
-        from pydantic import ValidationError
-        
+        """Test short password validation"""
         with pytest.raises(ValidationError):
             UserCreate(email="test@example.com", password="short")
 
     def test_user_create_invalid_role(self):
-        from src.schemas.auth import UserCreate
-        from pydantic import ValidationError
-        
+        """Test invalid role validation"""
         with pytest.raises(ValidationError):
             UserCreate(email="test@example.com", password="password123", role="invalid")
 
@@ -66,8 +58,7 @@ class TestPricingModels:
     """Tests for pricing request/response models"""
 
     def test_pricing_request_valid(self):
-        from src.api.routers.pricing import PricingRequest
-        
+        """Test valid pricing request"""
         req = PricingRequest(
             spot=100.0,
             strike=100.0,
@@ -80,9 +71,7 @@ class TestPricingModels:
         assert req.option_type == "call"
 
     def test_pricing_request_invalid_spot(self):
-        from src.api.routers.pricing import PricingRequest
-        from pydantic import ValidationError
-        
+        """Test invalid spot price validation"""
         with pytest.raises(ValidationError):
             PricingRequest(
                 spot=-100.0,  # Invalid: must be > 0
@@ -94,9 +83,7 @@ class TestPricingModels:
             )
 
     def test_pricing_request_invalid_option_type(self):
-        from src.api.routers.pricing import PricingRequest
-        from pydantic import ValidationError
-        
+        """Test invalid option type validation"""
         with pytest.raises(ValidationError):
             PricingRequest(
                 spot=100.0,

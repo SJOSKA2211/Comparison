@@ -37,11 +37,8 @@ async def price_option(request: PricingRequest, user: dict = Depends(require_aut
     start_time = time.perf_counter_ns()
 
     result = black_scholes_price(
-        spot_price=request.spot,
-        strike_price=request.strike,
-        risk_free_rate=request.rate,
-        volatility=request.volatility,
-        time_to_maturity=request.time_to_maturity,
+        spot=request.spot, strike=request.strike, rate=request.rate,
+        volatility=request.volatility, time_to_maturity=request.time_to_maturity,
         option_type=request.option_type,
     )
 
@@ -59,11 +56,8 @@ async def compare_methods(
     """Compare all numerical methods and persist experiment"""
     comparator = NumericalMethodComparator()
     results = comparator.compare_all(
-        spot_price=request.spot,
-        strike_price=request.strike,
-        risk_free_rate=request.rate,
-        volatility=request.volatility,
-        time_to_maturity=request.time_to_maturity,
+        spot=request.spot, strike=request.strike, rate=request.rate,
+        volatility=request.volatility, time_to_maturity=request.time_to_maturity,
         option_type=request.option_type
     )
 

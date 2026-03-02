@@ -6,6 +6,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 
 class UserResponse(BaseModel):
+    """User response schema"""
     id: UUID
     email: str
     role: str
@@ -27,7 +28,9 @@ class TokenResponse(BaseModel):
     user: Optional["UserResponse"] = None
 
 
+
 class UserCreate(BaseModel):
+    """User creation schema"""
     email: EmailStr
     role: UserRole
     email_verified: bool

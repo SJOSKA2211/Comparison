@@ -1,5 +1,16 @@
 Starting tests...
 ============================= test session starts ==============================
+tests/test_feature_engineering.py:6
+  /app/tests/test_feature_engineering.py:6: DeprecationWarning:
+  Pyarrow will become a required dependency of pandas in the next major release of pandas (pandas 3.0),
+  (to allow more performant data types, such as the Arrow string type, and better interoperability with other libraries)
+  but was not found to be installed on your system.
+  If this would cause problems for you,
+  please provide us feedback at https://github.com/pandas-dev/pandas/issues/54466
+
+    import pandas as pd
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
 platform linux -- Python 3.12.12, pytest-9.0.2, pluggy-1.6.0 -- /home/jules/.pyenv/versions/3.12.12/bin/python3
 cachedir: .pytest_cache
 rootdir: /app

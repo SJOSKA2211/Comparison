@@ -1,4 +1,4 @@
-"""Trace ML import script."""
+# pylint: disable=missing-module-docstring, broad-exception-caught, unused-import
 import os
 import sys
 import traceback

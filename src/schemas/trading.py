@@ -1,4 +1,4 @@
-"""Trading schemas."""
+# pylint: disable=missing-module-docstring, missing-class-docstring, too-few-public-methods, import-error, no-name-in-module
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
@@ -21,6 +21,7 @@ class PositionResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class OrderCreate(BaseModel):
     """Schema for order creation."""
     portfolio_id: UUID
@@ -29,6 +30,7 @@ class OrderCreate(BaseModel):
     order_type: OrderType = OrderType.MARKET
     quantity: float = Field(gt=0)
     price: Optional[float] = Field(None, gt=0)
+
 
 class OrderResponse(BaseModel):
     """Schema for order response."""
@@ -47,10 +49,12 @@ class OrderResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class PortfolioCreate(BaseModel):
     """Schema for portfolio creation."""
     name: str = "Main Portfolio"
     currency: str = "USD"
+
 
 class PortfolioResponse(BaseModel):
     """Schema for portfolio response."""
@@ -65,14 +69,17 @@ class PortfolioResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class WatchlistCreate(BaseModel):
     """Schema for watchlist creation."""
     name: str
     symbols: List[str] = []
 
+
 class WatchlistUpdate(BaseModel):
     """Schema for watchlist update."""
     symbols: List[str]
+
 
 class WatchlistResponse(BaseModel):
     """Schema for watchlist response."""

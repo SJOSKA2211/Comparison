@@ -1,4 +1,4 @@
-"""Minimal test script."""
+# pylint: disable=missing-module-docstring, unused-import
 import sys
 
 print("Python works")

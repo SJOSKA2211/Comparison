@@ -21,6 +21,7 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 async def create_user_session(db: AsyncSession, user_id: UUID, request: Request = None) -> str:
     token = secrets.token_urlsafe(32)
+    token_hash = get_token_hash(token)
     new_session = UserSession(
         user_id=user_id,
         token_hash=token,  # In real app, store hash(token)

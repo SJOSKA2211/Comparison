@@ -85,7 +85,7 @@ secrets/
 *.db
 *.sqlite3
 data/
-models/
+/models/
 !models/.gitkeep
 
 # Logs

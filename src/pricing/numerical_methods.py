@@ -1,66 +1,99 @@
+# pylint: disable=no-else-return
+# ruff: noqa: N803, N806, PLR0913, PLR0917, PLR0914
+# pylint: disable=invalid-name, too-many-arguments, too-many-locals, too-many-positional-arguments
+"""
+BS-Opt Numerical Pricing Methods
+Black-Scholes, FDM, Monte Carlo, and Trinomial Trees
+"""
+
+from __future__ import annotations
+
 import math
 import time
 from dataclasses import dataclass
-from typing import Literal, Optional
+from typing import Literal
 
 import numpy as np
 from scipy.stats import norm
 
 # =============================================================================
-# Analytical Solution (Black-Scholes)
+# Analytical Black-Scholes
 # =============================================================================
 
 
 def black_scholes_price(
-    spot_price: float,
-    strike_price: float,
-    risk_free_rate: float,
-    volatility: float,
-    time_to_maturity: float,
+    S: float,
+    K: float,
+    r: float,
+    sigma: float,
+    T: float,
     option_type: Literal["call", "put"] = "call",
 ) -> dict:
     """
-    Calculate Black-Scholes price and Greeks.
+    Analytical Black-Scholes option pricing with Greeks.
+
+    Parameters:
+        S: Current stock price
+        K: Strike price
+        r: Risk-free interest rate
+        sigma: Volatility
+        T: Time to maturity (in years)
+        option_type: 'call' or 'put'
+
+    Returns:
+        Dictionary with price and all Greeks
     """
-    start_time = time.perf_counter_ns()
+    if T <= 0:
+        # At expiration
+        if option_type == "call":
+            return {
+                "price": max(S - K, 0),
+                "delta": 1 if S > K else 0,
+                "gamma": 0,
+                "theta": 0,
+                "vega": 0,
+                "rho": 0,
+            }
+        else:
+            return {
+                "price": max(K - S, 0),
+                "delta": -1 if S < K else 0,
+                "gamma": 0,
+                "theta": 0,
+                "vega": 0,
+                "rho": 0,
+            }
 
-    if time_to_maturity <= 0:
-        return {
-            "price": max(0, spot_price - strike_price) if option_type == "call" else max(0, strike_price - spot_price),
-            "delta": 0, "gamma": 0, "theta": 0, "vega": 0, "rho": 0,
-            "computation_time_us": 0
-        }
-
-    sqrt_t = math.sqrt(time_to_maturity)
-    d1 = (math.log(spot_price / strike_price) + (risk_free_rate + 0.5 * volatility**2) * time_to_maturity) / (volatility * sqrt_t)
-    d2 = d1 - volatility * sqrt_t
+    sqrt_T = math.sqrt(T)
+    d1 = (math.log(S / K) + (r + 0.5 * sigma**2) * T) / (sigma * sqrt_T)
+    d2 = d1 - sigma * sqrt_T
 
     # Standard normal CDF and PDF
-    n_d1 = norm.cdf(d1)
-    n_d2 = norm.cdf(d2)
-    pdf_d1 = norm.pdf(d1)
+    N_d1 = norm.cdf(d1)
+    N_d2 = norm.cdf(d2)
+    n_d1 = norm.pdf(d1)
 
     # Discount factor
-    df = math.exp(-risk_free_rate * time_to_maturity)
+    df = math.exp(-r * T)
 
     if option_type == "call":
-        price = spot_price * n_d1 - strike_price * df * n_d2
-        delta = n_d1
-        rho = strike_price * time_to_maturity * df * n_d2 / 100
+        price = S * N_d1 - K * df * N_d2
+        delta = N_d1
+        rho = K * T * df * N_d2 / 100
     else:
-        n_neg_d1 = norm.cdf(-d1)
-        n_neg_d2 = norm.cdf(-d2)
-        price = strike_price * df * n_neg_d2 - spot_price * n_neg_d1
-        delta = n_d1 - 1
-        rho = -strike_price * time_to_maturity * df * n_neg_d2 / 100
+        N_neg_d1 = norm.cdf(-d1)
+        N_neg_d2 = norm.cdf(-d2)
+        price = K * df * N_neg_d2 - S * N_neg_d1
+        delta = N_d1 - 1
+        rho = -K * T * df * N_neg_d2 / 100
 
     # Greeks (same for call/put except delta and rho)
-    gamma = pdf_d1 / (spot_price * volatility * sqrt_t)
-    vega = spot_price * pdf_d1 * sqrt_t / 100
-    theta = (-(spot_price * pdf_d1 * volatility) / (2 * sqrt_t) - risk_free_rate * strike_price * df *
-             (n_d2 if option_type == "call" else norm.cdf(-d2))) / 365
-
-    computation_time = (time.perf_counter_ns() - start_time) // 1000
+    gamma = n_d1 / (S * sigma * sqrt_T)
+    vega = S * n_d1 * sqrt_T / 100
+    theta = (
+        -(S * n_d1 * sigma) / (2 * sqrt_T)
+        - r * K * df * (N_d2 if option_type == "call" else norm.cdf(-d2))
+    ) / 365
 
     return {
         "price": price,
@@ -69,7 +102,6 @@ def black_scholes_price(
         "theta": theta,
         "vega": vega,
         "rho": rho,
-        "computation_time_us": computation_time,
     }
 
 
@@ -79,15 +111,15 @@ def black_scholes_price(
 
 
 def crank_nicolson_price(
-    spot_price: float,
-    strike_price: float,
-    risk_free_rate: float,
-    volatility: float,
-    time_to_maturity: float,
+    S: float,
+    K: float,
+    r: float,
+    sigma: float,
+    T: float,
     option_type: Literal["call", "put"] = "call",
-    max_spot_price: Optional[float] = None,
-    asset_steps: int = 100,  # Asset price steps (M)
-    time_steps: int = 100,  # Time steps (N)
+    S_max: float = None,
+    M: int = 100,  # Asset price steps
+    N: int = 100,  # Time steps
 ) -> dict:
     """
     Crank-Nicolson finite difference method for option pricing.
@@ -95,73 +127,75 @@ def crank_nicolson_price(
     """
     start_time = time.perf_counter_ns()
 
-    if max_spot_price is None:
-        max_spot_price = 4 * strike_price
+    if S_max is None:
+        S_max = 4 * K
 
-    dt = time_to_maturity / time_steps
+    dt = T / N
 
     # Grid
-    spot_grid = np.linspace(0, max_spot_price, asset_steps + 1)
+    S_grid = np.linspace(0, S_max, M + 1)
 
     # Initialize option values at maturity
     if option_type == "call":
-        values = np.maximum(spot_grid - strike_price, 0)
+        V = np.maximum(S_grid - K, 0)
     else:
-        values = np.maximum(strike_price - spot_grid, 0)
+        V = np.maximum(K - S_grid, 0)
 
     # Coefficients for tridiagonal system
-    j = np.arange(1, asset_steps)
-    alpha = 0.25 * dt * (volatility**2 * j**2 - risk_free_rate * j)
-    beta = -0.5 * dt * (volatility**2 * j**2 + risk_free_rate)
-    gamma = 0.25 * dt * (volatility**2 * j**2 + risk_free_rate * j)
+    j = np.arange(1, M)
+    alpha = 0.25 * dt * (sigma**2 * j**2 - r * j)
+    beta = -0.5 * dt * (sigma**2 * j**2 + r)
+    gamma = 0.25 * dt * (sigma**2 * j**2 + r * j)
 
     # Build tridiagonal matrices
     # A * V_new = B * V_old (Crank-Nicolson)
 
     # Implicit part (LHS)
-    a_diag = 1 - beta
-    a_lower = -alpha[1:]
-    a_upper = -gamma[:-1]
+    A_diag = 1 - beta
+    A_lower = -alpha[1:]
+    A_upper = -gamma[:-1]
+
+    # Explicit part (RHS)
+    B_diag = 1 + beta
+    B_lower = alpha[1:]
+    B_upper = gamma[:-1]
 
     # Time stepping
-    for n in range(time_steps):
-        # Build RHS (vectorized)
-        # rhs[k] corresponds to j=k+1
-        # alpha, beta, gamma are size M-1
-        # values size M+1
-        # values[1:-1] size M-1
-        # values[:-2] size M-1 (from 0 to M-2)
-        # values[2:] size M-1 (from 2 to M)
-        rhs = alpha * values[:-2] + (1 + beta) * values[1:-1] + gamma * values[2:]
+    for n in range(N):
+        # Build RHS
+        rhs = np.zeros(M - 1)
+        rhs[0] = B_lower[0] * V[0] + B_diag[0] * V[1] + B_upper[0] * V[2]
+        rhs[1:-1] = B_lower[1:-1] * V[1:-2] + B_diag[1:-1] * V[2:-1] + B_upper[1:-1] * V[3:-1]
+        rhs[-1] = B_lower[-1] * V[-3] + B_diag[-1] * V[-2] + B_upper[-1] * V[-1]
 
         # Apply boundary conditions
         if option_type == "call":
             # V(0, t) = 0, V(S_max, t) = S_max - K * exp(-r*(T-t))
-            rhs[-1] += gamma[-1] * (max_spot_price - strike_price * np.exp(-risk_free_rate * (time_to_maturity - (n + 1) * dt)))
+            rhs[-1] += gamma[-1] * (S_max - K * np.exp(-r * (T - (n + 1) * dt)))
         else:
             # V(0, t) = K * exp(-r*(T-t)), V(S_max, t) = 0
-            rhs[0] += alpha[0] * strike_price * np.exp(-risk_free_rate * (time_to_maturity - (n + 1) * dt))
+            rhs[0] += alpha[0] * K * np.exp(-r * (T - (n + 1) * dt))
 
         # Solve tridiagonal system using Thomas algorithm
-        values[1:-1] = solve_tridiagonal(a_lower, a_diag, a_upper, rhs)
+        V[1:-1] = solve_tridiagonal(A_lower, A_diag, A_upper, rhs)
 
         # Update boundary values
         if option_type == "call":
-            values[0] = 0
-            values[-1] = max_spot_price - strike_price * np.exp(-risk_free_rate * (time_to_maturity - (n + 1) * dt))
+            V[0] = 0
+            V[-1] = S_max - K * np.exp(-r * (T - (n + 1) * dt))
         else:
-            values[0] = strike_price * np.exp(-risk_free_rate * (time_to_maturity - (n + 1) * dt))
-            values[-1] = 0
+            V[0] = K * np.exp(-r * (T - (n + 1) * dt))
+            V[-1] = 0
 
-    # Interpolate to find price at spot_price
-    price = np.interp(spot_price, spot_grid, values)
+    # Interpolate to find price at S
+    price = np.interp(S, S_grid, V)
 
     computation_time = (time.perf_counter_ns() - start_time) // 1000
 
     return {
         "price": price,
         "time_us": computation_time,
-        "grid_size": asset_steps,
+        "grid_size": M,
     }
 
 
@@ -195,14 +229,14 @@ def solve_tridiagonal(a: np.ndarray, b: np.ndarray, c: np.ndarray, d: np.ndarray
 
 
 def monte_carlo_price(
-    spot_price: float,
-    strike_price: float,
-    risk_free_rate: float,
-    volatility: float,
-    time_to_maturity: float,
+    S: float,
+    K: float,
+    r: float,
+    sigma: float,
+    T: float,
     option_type: Literal["call", "put"] = "call",
     num_paths: int = 100000,
-    seed: Optional[int] = None,
+    seed: int = None,
 ) -> dict:
     """
     Monte Carlo option pricing with antithetic variance reduction.
@@ -213,25 +247,25 @@ def monte_carlo_price(
         np.random.seed(seed)
 
     # Generate random numbers
-    z_score = np.random.standard_normal(num_paths // 2)
+    Z = np.random.standard_normal(num_paths // 2)
 
     # Antithetic variates
-    z_score = np.concatenate([z_score, -z_score])
+    Z = np.concatenate([Z, -Z])
 
     # Simulate terminal stock prices
-    drift = (risk_free_rate - 0.5 * volatility**2) * time_to_maturity
-    diffusion = volatility * np.sqrt(time_to_maturity) * z_score
-    spot_terminal = spot_price * np.exp(drift + diffusion)
+    drift = (r - 0.5 * sigma**2) * T
+    diffusion = sigma * np.sqrt(T) * Z
+    S_T = S * np.exp(drift + diffusion)
 
     # Calculate payoffs
     if option_type == "call":
-        payoffs = np.maximum(spot_terminal - strike_price, 0)
+        payoffs = np.maximum(S_T - K, 0)
     else:
-        payoffs = np.maximum(strike_price - spot_terminal, 0)
+        payoffs = np.maximum(K - S_T, 0)
 
     # Discounted expected payoff
-    price = np.exp(-risk_free_rate * time_to_maturity) * np.mean(payoffs)
-    std_error = np.exp(-risk_free_rate * time_to_maturity) * np.std(payoffs) / np.sqrt(num_paths)
+    price = np.exp(-r * T) * np.mean(payoffs)
+    std_error = np.exp(-r * T) * np.std(payoffs) / np.sqrt(num_paths)
 
     computation_time = (time.perf_counter_ns() - start_time) // 1000
 
@@ -249,13 +283,13 @@ def monte_carlo_price(
 
 
 def trinomial_tree_price(
-    spot_price: float,
-    strike_price: float,
-    risk_free_rate: float,
-    volatility: float,
-    time_to_maturity: float,
+    S: float,
+    K: float,
+    r: float,
+    sigma: float,
+    T: float,
     option_type: Literal["call", "put"] = "call",
-    steps: int = 200,
+    N: int = 200,
     use_richardson: bool = True,
 ) -> dict:
     """
@@ -263,57 +297,59 @@ def trinomial_tree_price(
     """
     start_time = time.perf_counter_ns()
 
-    def _tree_price(num_steps: int) -> float:
-        dt = time_to_maturity / num_steps
+    def _tree_price(steps: int) -> float:
+        dt = T / steps
 
         # Trinomial parameters
-        u = np.exp(volatility * np.sqrt(2 * dt))
-        # d = 1 / u # Unused
-        # m = 1  # middle factor # Unused
+        u = np.exp(sigma * np.sqrt(2 * dt))
 
         # Risk-neutral probabilities
         sqrt_dt = np.sqrt(dt / 2)
-        pu = ((np.exp(risk_free_rate * dt / 2) - np.exp(-volatility * sqrt_dt)) /
-              (np.exp(volatility * sqrt_dt) - np.exp(-volatility * sqrt_dt)))**2
-        pd = ((np.exp(volatility * sqrt_dt) - np.exp(risk_free_rate * dt / 2)) /
-              (np.exp(volatility * sqrt_dt) - np.exp(-volatility * sqrt_dt)))**2
+        pu = (
+            (np.exp(r * dt / 2) - np.exp(-sigma * sqrt_dt))
+            / (np.exp(sigma * sqrt_dt) - np.exp(-sigma * sqrt_dt))
+        ) ** 2
+        pd = (
+            (np.exp(sigma * sqrt_dt) - np.exp(r * dt / 2))
+            / (np.exp(sigma * sqrt_dt) - np.exp(-sigma * sqrt_dt))
+        ) ** 2
         pm = 1 - pu - pd
 
         # Initialize asset prices at maturity
-        # num_nodes = 2 * num_steps + 1 # unused except for range
-        spot_terminal = spot_price * (u ** np.arange(num_steps, -num_steps - 1, -1))
+        num_nodes = 2 * steps + 1
+        S_T = S * (u ** np.arange(steps, -steps - 1, -1))
 
         # Option values at maturity
         if option_type == "call":
-            values = np.maximum(spot_terminal - strike_price, 0)
+            V = np.maximum(S_T - K, 0)
         else:
-            values = np.maximum(strike_price - spot_terminal, 0)
+            V = np.maximum(K - S_T, 0)
 
         # Backward induction
-        df = np.exp(-risk_free_rate * dt)
-        for i in range(num_steps - 1, -1, -1):
-            num_nodes_i = 2 * i + 1
-            values_new = np.zeros(num_nodes_i)
-            for j in range(num_nodes_i):
-                values_new[j] = df * (pu * values[j] + pm * values[j + 1] + pd * values[j + 2])
-            values = values_new
+        df = np.exp(-r * dt)
+        for i in range(steps - 1, -1, -1):
+            num_nodes = 2 * i + 1
+            V_new = np.zeros(num_nodes)
+            for j in range(num_nodes):
+                V_new[j] = df * (pu * V[j] + pm * V[j + 1] + pd * V[j + 2])
+            V = V_new
 
-        return values[0]
+        return V[0]
 
     if use_richardson:
         # Richardson extrapolation: 2 * V(2N) - V(N)
-        price_2n = _tree_price(steps)
-        price_n = _tree_price(steps // 2)
-        price = 2 * price_2n - price_n
+        V_2N = _tree_price(N)
+        V_N = _tree_price(N // 2)
+        price = 2 * V_2N - V_N
     else:
-        price = _tree_price(steps)
+        price = _tree_price(N)
 
     computation_time = (time.perf_counter_ns() - start_time) // 1000
 
     return {
         "price": price,
         "time_us": computation_time,
-        "steps": steps,
+        "steps": N,
     }
 
 
@@ -332,37 +368,26 @@ class NumericalMethodComparator:
 
     def compare_all(
         self,
-        spot_price: float,
-        strike_price: float,
-        risk_free_rate: float,
-        volatility: float,
-        time_to_maturity: float,
+        S: float,
+        K: float,
+        r: float,
+        sigma: float,
+        T: float,
         option_type: Literal["call", "put"] = "call",
     ) -> dict:
         """Run all methods and return comparative results."""
 
         # Analytical (benchmark)
-        analytical = black_scholes_price(
-            spot_price, strike_price, risk_free_rate, volatility, time_to_maturity, option_type
-        )
+        analytical = black_scholes_price(S, K, r, sigma, T, option_type)
 
         # FDM
-        fdm = crank_nicolson_price(
-            spot_price, strike_price, risk_free_rate, volatility, time_to_maturity, option_type,
-            asset_steps=self.fdm_grid_size
-        )
+        fdm = crank_nicolson_price(S, K, r, sigma, T, option_type, M=self.fdm_grid_size)
 
         # Monte Carlo
-        mc = monte_carlo_price(
-            spot_price, strike_price, risk_free_rate, volatility, time_to_maturity, option_type,
-            num_paths=self.mc_paths
-        )
+        mc = monte_carlo_price(S, K, r, sigma, T, option_type, num_paths=self.mc_paths)
 
         # Trinomial Tree
-        tree = trinomial_tree_price(
-            spot_price, strike_price, risk_free_rate, volatility, time_to_maturity, option_type,
-            steps=self.tree_steps
-        )
+        tree = trinomial_tree_price(S, K, r, sigma, T, option_type, N=self.tree_steps)
 
         # Calculate errors
         analytical_price = analytical["price"]

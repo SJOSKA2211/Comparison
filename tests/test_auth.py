@@ -5,14 +5,7 @@ BS-Opt Test Suite
 Tests for authentication functions
 """
 
-import secrets
-from urllib.parse import urlencode
-
 import pytest
-from pydantic import ValidationError
-
-from src.api.routers.pricing import PricingRequest
-from src.schemas.auth import UserCreate
 
 # =============================================================================
 # Test User Models
@@ -23,24 +16,19 @@ class TestUserModels:
     """Tests for Pydantic user models"""
 
     def test_user_create_valid(self):
-        from src.schemas.auth import UserCreate
-        
-        user = UserCreate(
-            email="test@example.com",
-            password="securepassword123",
-            role="trader"
-        )
+        from src.api.main import UserCreate
+
+        user = UserCreate(email="test@example.com", password="securepassword123", role="trader")
         assert user.email == "test@example.com"
         assert user.role == "trader"
 
     def test_user_create_default_role(self):
-        from src.schemas.auth import UserCreate
-        
+        from src.api.main import UserCreate
+
         user = UserCreate(email="test@example.com", password="password123")
         assert user.role == "trader"
 
     def test_user_create_invalid_email(self):
-        from src.schemas.auth import UserCreate
         from pydantic import ValidationError
 
         from src.api.main import UserCreate
@@ -49,7 +37,6 @@ class TestUserModels:
             UserCreate(email="not-an-email", password="password123")
 
     def test_user_create_short_password(self):
-        from src.schemas.auth import UserCreate
         from pydantic import ValidationError
 
         from src.api.main import UserCreate
@@ -58,7 +45,6 @@ class TestUserModels:
             UserCreate(email="test@example.com", password="short")
 
     def test_user_create_invalid_role(self):
-        from src.schemas.auth import UserCreate
         from pydantic import ValidationError
 
         from src.api.main import UserCreate
@@ -76,8 +62,8 @@ class TestPricingModels:
     """Tests for pricing request/response models"""
 
     def test_pricing_request_valid(self):
-        from src.api.routers.pricing import PricingRequest
-        
+        from src.api.main import PricingRequest
+
         req = PricingRequest(
             spot=100.0,
             strike=100.0,
@@ -90,7 +76,6 @@ class TestPricingModels:
         assert req.option_type == "call"
 
     def test_pricing_request_invalid_spot(self):
-        from src.api.routers.pricing import PricingRequest
         from pydantic import ValidationError
 
         from src.api.main import PricingRequest
@@ -106,7 +91,6 @@ class TestPricingModels:
             )
 
     def test_pricing_request_invalid_option_type(self):
-        from src.api.routers.pricing import PricingRequest
         from pydantic import ValidationError
 
         from src.api.main import PricingRequest
@@ -132,8 +116,8 @@ class TestOAuthUrls:
 
     def test_google_oauth_url_structure(self):
         """Verify Google OAuth URL structure"""
+        from urllib.parse import urlencode
 
-        # pylint: disable=invalid-name
         google_auth_url = "https://accounts.google.com/o/oauth2/v2/auth"
         params = {
             "client_id": "test-client-id",
@@ -150,8 +134,8 @@ class TestOAuthUrls:
 
     def test_github_oauth_url_structure(self):
         """Verify GitHub OAuth URL structure"""
+        from urllib.parse import urlencode
 
-        # pylint: disable=invalid-name
         github_auth_url = "https://github.com/login/oauth/authorize"
         params = {
             "client_id": "test-client-id",
@@ -174,14 +158,16 @@ class TestTokenGeneration:
     """Tests for token/secret generation"""
 
     def test_secure_token_generation(self):
-        """Test token generation length"""
+        import secrets
+
         token = secrets.token_urlsafe(32)
 
         assert len(token) >= 32
         assert isinstance(token, str)
 
     def test_tokens_are_unique(self):
-        """Test token uniqueness"""
+        import secrets
+
         tokens = [secrets.token_urlsafe(32) for _ in range(100)]
 
         assert len(set(tokens)) == 100  # All unique

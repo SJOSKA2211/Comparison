@@ -1,3 +1,4 @@
+# pylint: disable=missing-module-docstring, import-error, no-name-in-module, missing-class-docstring, import-outside-toplevel, unused-argument
 from typing import List
 
 from fastapi import APIRouter, Depends
@@ -41,34 +42,30 @@ async def price_option(request: PricingRequest, user: dict = Depends(require_aut
     start_time = time.perf_counter_ns()
 
     result = black_scholes_price(
-        spot_price=request.spot,
-        strike_price=request.strike,
-        risk_free_rate=request.rate,
-        volatility=request.volatility,
-        time_to_maturity=request.time_to_maturity,
+        S=request.spot,
+        K=request.strike,
+        r=request.rate,
+        sigma=request.volatility,
+        T=request.time_to_maturity,
         option_type=request.option_type,
     )
 
-    return {
-        **result,
-        "computation_time_us": (time.perf_counter_ns() - start_time) // 1000
-    }
+    return {**result, "computation_time_us": (time.perf_counter_ns() - start_time) // 1000}
+
 
 @router.post("/compare")
 async def compare_methods(
-    request: PricingRequest,
-    user: dict = Depends(require_auth),
-    db: AsyncSession = Depends(get_db)
+    request: PricingRequest, user: dict = Depends(require_auth), db: AsyncSession = Depends(get_db)
 ):
     """Compare all numerical methods and persist experiment"""
     comparator = NumericalMethodComparator()
     results = comparator.compare_all(
-        spot_price=request.spot,
-        strike_price=request.strike,
-        risk_free_rate=request.rate,
-        volatility=request.volatility,
-        time_to_maturity=request.time_to_maturity,
-        option_type=request.option_type
+        S=request.spot,
+        K=request.strike,
+        r=request.rate,
+        sigma=request.volatility,
+        T=request.time_to_maturity,
+        option_type=request.option_type,
     )
 
     # Persist the experiment (Feature Stack Upgrade!)
@@ -81,16 +78,13 @@ async def compare_methods(
         volatility=request.volatility,
         time_to_maturity=request.time_to_maturity,
         option_type=request.option_type,
-
         analytical_price=results["analytical"]["price"],
         fdm_price=results["fdm"]["price"],
         fdm_time_us=results["fdm"]["time_us"],
         fdm_error_pct=results["fdm"]["error_pct"],
-
         mc_price=results["monte_carlo"]["price"],
         mc_time_us=results["monte_carlo"]["time_us"],
         mc_error_pct=results["monte_carlo"]["error_pct"],
-
         tree_price=results["trinomial"]["price"],
         tree_time_us=results["trinomial"]["time_us"],
         tree_error_pct=results["trinomial"]["error_pct"],

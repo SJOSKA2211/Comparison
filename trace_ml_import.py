@@ -1,3 +1,4 @@
+# pylint: disable=duplicate-code
 # pylint: disable=missing-module-docstring, broad-exception-caught, unused-import
 import os
 import sys

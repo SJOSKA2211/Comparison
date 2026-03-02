@@ -1,3 +1,4 @@
+# pylint: disable=missing-module-docstring, missing-function-docstring, import-error, no-name-in-module
 # ruff: noqa: E402
 import asyncio
 from logging.config import fileConfig

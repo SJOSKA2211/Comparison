@@ -1,3 +1,4 @@
+# pylint: disable=duplicate-code, broad-exception-caught, import-error
 # pylint: disable=duplicate-code, missing-module-docstring, missing-function-docstring, wrong-import-order, unused-import
 # pylint: disable=duplicate-code, missing-module-docstring, missing-function-docstring, wrong-import-order, unused-import
 # pylint: disable=duplicate-code, invalid-name, missing-module-docstring, missing-function-docstring

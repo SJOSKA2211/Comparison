@@ -2,20 +2,27 @@
 # pylint: disable=missing-function-docstring, fixme
 from typing import List, Optional
 from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.api.deps import get_db, require_auth
 from src.models.market import MarketTick
 from src.models.trading import Order, OrderStatus, Portfolio, Position, Watchlist
 from src.schemas.trading import (
-    PortfolioCreate, PortfolioResponse, 
-    OrderCreate, OrderResponse, 
-    WatchlistCreate, WatchlistUpdate, WatchlistResponse
+    OrderCreate,
+    OrderResponse,
+    PortfolioCreate,
+    PortfolioResponse,
+    WatchlistCreate,
+    WatchlistResponse,
+    WatchlistUpdate,
 )
-from src.api.deps import require_auth
+
+# Remove local get_current_user_id and use dependency directly in endpoints if possible,
+# or keep a wrapper that returns UUID.
 
 router = APIRouter(prefix="/trading", tags=["Trading"])
 
@@ -71,24 +78,10 @@ async def get_portfolio(portfolio_id: UUID, db: AsyncSession = Depends(get_db)):
         tick_result = await db.execute(
             select(MarketTick.price)
             .where(MarketTick.symbol == pos.symbol)
-            .order_by(MarketTick.timestamp.desc())
+            .order_by(MarketTick.time.desc())
             .limit(1)
         )
-
-        stmt = (
-            select(MarketTick.symbol, MarketTick.price)
-            .join(
-                latest_times_subq,
-                (MarketTick.symbol == latest_times_subq.c.symbol) &
-                (MarketTick.time == latest_times_subq.c.max_time)
-            )
-        )
-
-        tick_result = await db.execute(stmt)
-        current_prices = {row.symbol: row.price for row in tick_result.all()}
-
-    for pos in portfolio.positions:
-        latest_price = current_prices.get(pos.symbol)
+        latest_price = tick_result.scalar()
         setattr(pos, "current_price", latest_price or pos.average_price)
 
     return portfolio
@@ -112,6 +105,9 @@ async def create_order(
     portfolio = portfolio_result.scalars().first()
     if not portfolio:
         raise HTTPException(status_code=404, detail="Portfolio not found")
+
+    # TODO: Validate balance for BUY orders
+    # TODO: Validate position for SELL orders
 
     new_order = Order(
         portfolio_id=order.portfolio_id,
@@ -160,7 +156,7 @@ async def create_order(
                     )
                     db.add(new_position)
             else:
-                 new_order.status = OrderStatus.REJECTED # Insufficient funds
+                new_order.status = OrderStatus.REJECTED  # Insufficient funds
 
         elif new_order.side == "sell":
             if position and position.quantity >= new_order.filled_quantity:

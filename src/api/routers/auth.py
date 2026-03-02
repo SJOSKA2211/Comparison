@@ -62,7 +62,7 @@ async def register(user_in: UserCreate, request: Request, db: AsyncSession = Dep
         email_verified=False,
     )
     db.add(new_user)
-    await db.flush() # Get user_id
+    await db.flush()  # Get user_id
 
     # Feature Upgrade: Auto-create portfolio
     await ensure_default_portfolio(db, new_user.id)
@@ -70,18 +70,19 @@ async def register(user_in: UserCreate, request: Request, db: AsyncSession = Dep
     token = await create_user_session(db, new_user.id, request)
     await db.commit()
 
-    return {
-        "access_token": token,
-        "token_type": "bearer",
-        "user": new_user
-    }
+    return {"access_token": token, "token_type": "bearer", "user": new_user}
+
 
 @router.post("/login", response_model=TokenResponse)
 async def login(login_in: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == login_in.email))
     user = result.scalars().first()
 
-    if not user or not user.password_hash or not verify_password(login_in.password, user.password_hash):
+    if (
+        not user
+        or not user.password_hash
+        or not verify_password(login_in.password, user.password_hash)
+    ):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     if not user.is_active:
@@ -95,11 +96,7 @@ async def login(login_in: LoginRequest, request: Request, db: AsyncSession = Dep
 
     await db.commit()
 
-    return {
-        "access_token": token,
-        "token_type": "bearer",
-        "user": user
-    }
+    return {"access_token": token, "token_type": "bearer", "user": user}
 
 
 @router.get("/me", response_model=UserResponse)

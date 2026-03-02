@@ -99,13 +99,8 @@ async def log_requests(request: Request, call_next):
     response = await call_next(request)
     duration_ms = (time.perf_counter() - start_time) * 1000
 
-    logger.info(
-        "request",
-        method=request.method,
-        path=request.url.path,
-        status=response.status_code,
-        duration_ms=round(duration_ms, 2),
-    )
+    logger.info("request", method=request.method, path=request.url.path,
+                status=response.status_code, duration_ms=round(duration_ms, 2))
 
     response.headers["X-Request-ID"] = request_id
     return response
@@ -137,5 +132,4 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-
-    uvicorn.run("src.api.main:app", host="127.0.0.1", port=8000, reload=True)  # nosec B104
+    uvicorn.run("src.api.main:app", host="0.0.0.0", port=8000, reload=True)  # nosec B104

@@ -135,12 +135,8 @@ async def get_current_user(request: Request, db=Depends(get_db)) -> dict | None:
     row = await cursor.fetchone()
 
     if row:
-        return {
-            "user_id": row["id"],
-            "email": row["email"],
-            "user_role": row["role"],
-            "email_verified": row["email_verified"],
-        }
+        return {"user_id": row["id"], "email": row["email"],
+                "user_role": row["role"], "email_verified": row["email_verified"]}
     return None
 
 
@@ -231,9 +227,10 @@ async def register_user(user: UserCreate, db=Depends(get_db)):
 
     # Create session
     token = secrets.token_urlsafe(32)
+
     await db.execute(
         "INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, datetime('now', '+24 hours'))",
-        (user_id, token),
+        (user_id, token)
     )
     await db.commit()
 
@@ -268,12 +265,8 @@ async def login(credentials: LoginRequest, db=Depends(get_db)):
 
     return TokenResponse(
         access_token=token,
-        user=UserResponse(
-            id=row["id"],
-            email=row["email"],
-            role=row["role"],
-            email_verified=bool(row["email_verified"]),
-        ),
+        user=UserResponse(id=row["id"], email=row["email"],
+                         role=row["role"], email_verified=bool(row["email_verified"]))
     )
 
 
@@ -301,11 +294,8 @@ async def price_option(request: PricingRequest, user: dict = Depends(require_aut
     from src.pricing.numerical_methods import black_scholes_price
 
     result = black_scholes_price(
-        S=request.spot,
-        K=request.strike,
-        r=request.rate,
-        sigma=request.volatility,
-        T=request.time_to_maturity,
+        spot=request.spot, strike=request.strike, rate=request.rate,
+        volatility=request.volatility, time_to_maturity=request.time_to_maturity,
         option_type=request.option_type,
     )
 
@@ -322,11 +312,8 @@ async def compare_methods(request: PricingRequest, user: dict = Depends(require_
 
     comparator = NumericalMethodComparator()
     results = comparator.compare_all(
-        S=request.spot,
-        K=request.strike,
-        r=request.rate,
-        sigma=request.volatility,
-        T=request.time_to_maturity,
+        spot=request.spot, strike=request.strike, rate=request.rate,
+        volatility=request.volatility, time_to_maturity=request.time_to_maturity,
         option_type=request.option_type,
     )
 
@@ -369,5 +356,4 @@ async def get_demo_price(symbol: str):
 
 if __name__ == "__main__":
     import uvicorn
-
-    uvicorn.run("src.api.local_main:app", host="127.0.0.1", port=8000, reload=True)  # nosec B104
+    uvicorn.run("src.api.local_main:app", host="127.0.0.1", port=8000, reload=True)

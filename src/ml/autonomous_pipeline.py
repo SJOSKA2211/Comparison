@@ -4,6 +4,8 @@ BS-Opt ML Autonomous Pipeline
 Ray-based training and inference worker
 """
 
+# pylint: disable=import-outside-toplevel, logging-fstring-interpolation, invalid-name, global-statement, broadcast-assignment
+
 from __future__ import annotations
 
 import asyncio
@@ -248,7 +250,7 @@ def run_pipeline():
 
         mlflow.set_tracking_uri(config.mlflow_uri)
         mlflow.set_experiment("bsopt-production")
-        logger.info(f"MLflow tracking: {config.mlflow_uri}")
+        logger.info("MLflow tracking: {config.mlflow_uri}")
     except Exception as e:
         logger.warning(f"MLflow not available: {e}")
 

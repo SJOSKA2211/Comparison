@@ -21,6 +21,7 @@ except Exception:
 
 try:
     import secrets
+    from datetime import datetime, timedelta
     import time
     from contextlib import asynccontextmanager
 
@@ -30,6 +31,7 @@ try:
     # pylint: disable=raise-missing-from, redefined-outer-name, unused-argument, missing-class-docstring, missing-function-docstring
     from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import ORJSONResponse
+    from passlib.context import CryptContext
     from pydantic import BaseModel, EmailStr, Field
 except Exception as e:
     with open("startup_error.log", "w") as f:

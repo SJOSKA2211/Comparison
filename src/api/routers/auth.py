@@ -1,10 +1,10 @@
+# pylint: disable=missing-module-docstring, import-error, no-name-in-module, missing-function-docstring, line-too-long
+# pylint: disable=missing-function-docstring
 import secrets
 from datetime import datetime, timedelta
-from typing import Optional  # noqa: F401
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import RedirectResponse  # noqa: F401
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,17 +18,20 @@ from src.schemas.auth import LoginRequest, TokenResponse, UserCreate, UserRespon
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
+
 async def create_user_session(db: AsyncSession, user_id: UUID, request: Request = None) -> str:
     token = secrets.token_urlsafe(32)
+    token_hash = get_token_hash(token)
     new_session = UserSession(
         user_id=user_id,
-        token_hash=token, # In real app, store hash(token)
+        token_hash=token,  # In real app, store hash(token)
         expires_at=datetime.utcnow() + timedelta(hours=24),
         ip_address=request.client.host if request and request.client else None,
-        user_agent=request.headers.get("User-Agent") if request else None
+        user_agent=request.headers.get("User-Agent") if request else None,
     )
     db.add(new_session)
     return token
+
 
 async def ensure_default_portfolio(db: AsyncSession, user_id: UUID):
     """Ensure user has at least one portfolio"""
@@ -39,10 +42,11 @@ async def ensure_default_portfolio(db: AsyncSession, user_id: UUID):
             user_id=user_id,
             name="Main Portfolio",
             currency="USD",
-            cash_balance=100000.0 # Default starting balance
+            cash_balance=100000.0,  # Default starting balance
         )
         db.add(new_portfolio)
         # Commit will happen in the calling endpoint
+
 
 @router.post("/register", response_model=TokenResponse)
 async def register(user_in: UserCreate, request: Request, db: AsyncSession = Depends(get_db)):
@@ -56,7 +60,7 @@ async def register(user_in: UserCreate, request: Request, db: AsyncSession = Dep
         password_hash=get_password_hash(user_in.password),
         role=UserRole(user_in.role),
         oauth_provider=OAuthProvider.LOCAL,
-        email_verified=False
+        email_verified=False,
     )
     db.add(new_user)
     await db.flush() # Get user_id
@@ -107,4 +111,6 @@ async def get_me(user: dict = Depends(get_current_user), db: AsyncSession = Depe
     result = await db.execute(select(User).where(User.id == user["user_id"]))
     db_user = result.scalars().first()
     return db_user
+
+
 # ... (Continuing to oauth later if needed, but this covers the core stack)

@@ -1,13 +1,8 @@
 """
-Feature engineering module for ML models.
-Includes technical indicators and signal generation.
+Feature engineering module for calculating technical indicators.
 """
-
-from typing import List, Optional  # noqa: F401
-
 import numpy as np
 import pandas as pd
-
 
 def calculate_technical_indicators(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate basic technical indicators for trading research"""
@@ -20,7 +15,7 @@ def calculate_technical_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df['sma_50'] = df['price'].rolling(window=50).mean()
 
     # RSI
-    delta = df['price'].diff()
+    delta = df["price"].diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
     rs = gain / loss
@@ -35,7 +30,7 @@ def calculate_technical_indicators(df: pd.DataFrame) -> pd.DataFrame:
 
 def generate_signals(df: pd.DataFrame) -> pd.DataFrame:
     """Generate basic trading signals based on SMA crossover"""
-    df['signal'] = 0
-    df.loc[df['sma_20'] > df['sma_50'], 'signal'] = 1
-    df.loc[df['sma_20'] < df['sma_50'], 'signal'] = -1
+    df["signal"] = 0
+    df.loc[df["sma_20"] > df["sma_50"], "signal"] = 1
+    df.loc[df["sma_20"] < df["sma_50"], "signal"] = -1
     return df

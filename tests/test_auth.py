@@ -1,22 +1,30 @@
+# pylint: disable=missing-function-docstring, import-outside-toplevel, no-name-in-module, import-error, invalid-name
+# pylint: disable=missing-function-docstring, no-name-in-module, import-error, import-outside-toplevel
 """
 BS-Opt Test Suite
 Tests for authentication functions
 """
 
-import pytest
+import secrets
+from urllib.parse import urlencode
 
+import pytest
+from pydantic import ValidationError
+
+from src.api.routers.pricing import PricingRequest
+from src.schemas.auth import UserCreate
 
 # =============================================================================
 # Test User Models
 # =============================================================================
 
+
 class TestUserModels:
     """Tests for Pydantic user models"""
 
     def test_user_create_valid(self):
-        """Test creating a valid user"""
-        from src.api.local_main import UserCreate
-
+        from src.schemas.auth import UserCreate
+        
         user = UserCreate(
             email="test@example.com",
             password="securepassword123",
@@ -26,32 +34,34 @@ class TestUserModels:
         assert user.role == "trader"
 
     def test_user_create_default_role(self):
-        """Test user creation with default role"""
-        from src.api.local_main import UserCreate
-
+        from src.schemas.auth import UserCreate
+        
         user = UserCreate(email="test@example.com", password="password123")
         assert user.role == "trader"
 
     def test_user_create_invalid_email(self):
-        """Test user creation with invalid email"""
-        from src.api.local_main import UserCreate
+        from src.schemas.auth import UserCreate
         from pydantic import ValidationError
+
+        from src.api.main import UserCreate
 
         with pytest.raises(ValidationError):
             UserCreate(email="not-an-email", password="password123")
 
     def test_user_create_short_password(self):
-        """Test user creation with short password"""
-        from src.api.local_main import UserCreate
+        from src.schemas.auth import UserCreate
         from pydantic import ValidationError
+
+        from src.api.main import UserCreate
 
         with pytest.raises(ValidationError):
             UserCreate(email="test@example.com", password="short")
 
     def test_user_create_invalid_role(self):
-        """Test user creation with invalid role"""
-        from src.api.local_main import UserCreate
+        from src.schemas.auth import UserCreate
         from pydantic import ValidationError
+
+        from src.api.main import UserCreate
 
         with pytest.raises(ValidationError):
             UserCreate(email="test@example.com", password="password123", role="invalid")
@@ -61,28 +71,29 @@ class TestUserModels:
 # Test Pricing Models
 # =============================================================================
 
+
 class TestPricingModels:
     """Tests for pricing request/response models"""
 
     def test_pricing_request_valid(self):
-        """Test valid pricing request"""
-        from src.api.local_main import PricingRequest
-
+        from src.api.routers.pricing import PricingRequest
+        
         req = PricingRequest(
             spot=100.0,
             strike=100.0,
             rate=0.05,
             volatility=0.2,
             time_to_maturity=1.0,
-            option_type="call"
+            option_type="call",
         )
         assert req.spot == 100.0
         assert req.option_type == "call"
 
     def test_pricing_request_invalid_spot(self):
-        """Test pricing request with invalid spot price"""
-        from src.api.local_main import PricingRequest
+        from src.api.routers.pricing import PricingRequest
         from pydantic import ValidationError
+
+        from src.api.main import PricingRequest
 
         with pytest.raises(ValidationError):
             PricingRequest(
@@ -91,13 +102,14 @@ class TestPricingModels:
                 rate=0.05,
                 volatility=0.2,
                 time_to_maturity=1.0,
-                option_type="call"
+                option_type="call",
             )
 
     def test_pricing_request_invalid_option_type(self):
-        """Test pricing request with invalid option type"""
-        from src.api.local_main import PricingRequest
+        from src.api.routers.pricing import PricingRequest
         from pydantic import ValidationError
+
+        from src.api.main import PricingRequest
 
         with pytest.raises(ValidationError):
             PricingRequest(
@@ -106,7 +118,7 @@ class TestPricingModels:
                 rate=0.05,
                 volatility=0.2,
                 time_to_maturity=1.0,
-                option_type="straddle"  # Invalid
+                option_type="straddle",  # Invalid
             )
 
 
@@ -114,13 +126,14 @@ class TestPricingModels:
 # Test OAuth URL Generation
 # =============================================================================
 
+
 class TestOAuthUrls:
     """Tests for OAuth URL handling"""
 
     def test_google_oauth_url_structure(self):
         """Verify Google OAuth URL structure"""
-        from urllib.parse import urlencode
 
+        # pylint: disable=invalid-name
         google_auth_url = "https://accounts.google.com/o/oauth2/v2/auth"
         params = {
             "client_id": "test-client-id",
@@ -137,8 +150,8 @@ class TestOAuthUrls:
 
     def test_github_oauth_url_structure(self):
         """Verify GitHub OAuth URL structure"""
-        from urllib.parse import urlencode
 
+        # pylint: disable=invalid-name
         github_auth_url = "https://github.com/login/oauth/authorize"
         params = {
             "client_id": "test-client-id",
@@ -156,22 +169,19 @@ class TestOAuthUrls:
 # Test Token Generation
 # =============================================================================
 
+
 class TestTokenGeneration:
     """Tests for token/secret generation"""
 
     def test_secure_token_generation(self):
-        """Verify token generation"""
-        import secrets
-
+        """Test token generation length"""
         token = secrets.token_urlsafe(32)
 
         assert len(token) >= 32
         assert isinstance(token, str)
 
     def test_tokens_are_unique(self):
-        """Verify token uniqueness"""
-        import secrets
-
+        """Test token uniqueness"""
         tokens = [secrets.token_urlsafe(32) for _ in range(100)]
 
         assert len(set(tokens)) == 100  # All unique

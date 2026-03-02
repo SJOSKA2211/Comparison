@@ -1,4 +1,3 @@
-import time
 from typing import List
 
 from fastapi import APIRouter, Depends
@@ -11,9 +10,8 @@ from src.database import get_db
 from src.models.market import NumericalExperiment
 from src.pricing.numerical_methods import NumericalMethodComparator, black_scholes_price
 
-# pylint: disable=unused-import
-
 router = APIRouter(prefix="/pricing", tags=["Pricing"])
+
 
 class PricingRequest(BaseModel):
     spot: float = Field(gt=0)
@@ -22,6 +20,7 @@ class PricingRequest(BaseModel):
     volatility: float = Field(gt=0, le=5)
     time_to_maturity: float = Field(gt=0)
     option_type: str = Field(pattern="^(call|put)$")
+
 
 class PricingResponse(BaseModel):
     price: float
@@ -33,15 +32,20 @@ class PricingResponse(BaseModel):
     computation_time_us: int
     model: str = "black-scholes"
 
+
 @router.post("/black-scholes", response_model=PricingResponse)
 async def price_option(request: PricingRequest, user: dict = Depends(require_auth)):
     """Calculate option price with Black-Scholes"""
+    import time
 
     start_time = time.perf_counter_ns()
 
     result = black_scholes_price(
-        S=request.spot, K=request.strike, r=request.rate,
-        sigma=request.volatility, T=request.time_to_maturity,
+        spot_price=request.spot,
+        strike_price=request.strike,
+        risk_free_rate=request.rate,
+        volatility=request.volatility,
+        time_to_maturity=request.time_to_maturity,
         option_type=request.option_type,
     )
 
@@ -59,8 +63,11 @@ async def compare_methods(
     """Compare all numerical methods and persist experiment"""
     comparator = NumericalMethodComparator()
     results = comparator.compare_all(
-        S=request.spot, K=request.strike, r=request.rate,
-        sigma=request.volatility, T=request.time_to_maturity,
+        spot_price=request.spot,
+        strike_price=request.strike,
+        risk_free_rate=request.rate,
+        volatility=request.volatility,
+        time_to_maturity=request.time_to_maturity,
         option_type=request.option_type
     )
 
@@ -86,7 +93,7 @@ async def compare_methods(
 
         tree_price=results["trinomial"]["price"],
         tree_time_us=results["trinomial"]["time_us"],
-        tree_error_pct=results["trinomial"]["error_pct"]
+        tree_error_pct=results["trinomial"]["error_pct"],
     )
 
     db.add(experiment)
@@ -94,11 +101,9 @@ async def compare_methods(
 
     return results
 
+
 @router.get("/experiments", response_model=List[dict])
-async def get_experiments(
-    user: dict = Depends(require_auth),
-    db: AsyncSession = Depends(get_db)
-):
+async def get_experiments(user: dict = Depends(require_auth), db: AsyncSession = Depends(get_db)):
     """Get historical experiments for the current user"""
     result = await db.execute(
         select(NumericalExperiment)

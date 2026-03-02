@@ -47,9 +47,6 @@ export default function PricingPanel() {
             setResult(data)
         } catch (e) {
             setError(e.message)
-            // Fallback: calculate locally
-            const price = calculateBS(params)
-            setResult({ price, delta: 0.55, gamma: 0.02, theta: -0.05, vega: 0.38, rho: 0.45, local: true })
         } finally {
             setLoading(false)
         }
@@ -284,25 +281,3 @@ export default function PricingPanel() {
     )
 }
 
-// Simple BS calculation fallback
-function calculateBS({ spot, strike, rate, volatility, timeToMaturity, optionType }) {
-    const d1 = (Math.log(spot / strike) + (rate + 0.5 * volatility ** 2) * timeToMaturity) / (volatility * Math.sqrt(timeToMaturity))
-    const d2 = d1 - volatility * Math.sqrt(timeToMaturity)
-
-    const N = x => 0.5 * (1 + erf(x / Math.sqrt(2)))
-
-    if (optionType === 'call') {
-        return spot * N(d1) - strike * Math.exp(-rate * timeToMaturity) * N(d2)
-    } else {
-        return strike * Math.exp(-rate * timeToMaturity) * N(-d2) - spot * N(-d1)
-    }
-}
-
-function erf(x) {
-    const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911
-    const sign = x < 0 ? -1 : 1
-    x = Math.abs(x)
-    const t = 1.0 / (1.0 + p * x)
-    const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x)
-    return sign * y
-}

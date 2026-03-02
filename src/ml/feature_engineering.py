@@ -1,18 +1,21 @@
-"""Feature engineering utilities."""
-
-
+"""
+Feature engineering module for calculating technical indicators.
+"""
 import numpy as np
 import pandas as pd
 
-
 def calculate_technical_indicators(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate basic technical indicators for trading research"""
+    if df.empty:
+        for col in ["sma_20", "sma_50", "rsi", "returns", "volatility"]:
+            df[col] = pd.Series([], dtype=float)
+        return df
     # SMA
     df['sma_20'] = df['price'].rolling(window=20).mean()
     df['sma_50'] = df['price'].rolling(window=50).mean()
 
     # RSI
-    delta = df['price'].diff()
+    delta = df["price"].diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
     rs = gain / loss
@@ -24,9 +27,10 @@ def calculate_technical_indicators(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+
 def generate_signals(df: pd.DataFrame) -> pd.DataFrame:
     """Generate basic trading signals based on SMA crossover"""
-    df['signal'] = 0
-    df.loc[df['sma_20'] > df['sma_50'], 'signal'] = 1
-    df.loc[df['sma_20'] < df['sma_50'], 'signal'] = -1
+    df["signal"] = 0
+    df.loc[df["sma_20"] > df["sma_50"], "signal"] = 1
+    df.loc[df["sma_20"] < df["sma_50"], "signal"] = -1
     return df

@@ -1,5 +1,9 @@
+# pylint: disable=missing-module-docstring, unused-import
 import sys
 
-# import fastapi # Unused
+print("Python works")
 print(sys.executable)
-# print("FastAPI installed")
+try:
+    print("FastAPI installed")
+except ImportError:
+    print("FastAPI missing")

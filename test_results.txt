@@ -18,6 +18,102 @@ configfile: pyproject.toml
 ____________________ TestUserModels.test_user_create_valid _____________________
 tests/test_auth.py:18: in test_user_create_valid
     from src.api.main import UserCreate
+src/api/main.py:19: in <module>
+    from src.api.routers import auth, pricing, trading, user
+src/api/routers/__init__.py:1: in <module>
+    from . import auth, pricing, trading, user
+src/api/routers/auth.py:12: in <module>
+    from src.api.deps import get_current_user
+src/api/deps.py:9: in <module>
+    from src.models.user import User, Session as UserSession
+E   ModuleNotFoundError: No module named 'src.models'
+_________________ TestUserModels.test_user_create_default_role _________________
+tests/test_auth.py:29: in test_user_create_default_role
+    from src.api.main import UserCreate
+src/api/main.py:19: in <module>
+    from src.api.routers import auth, pricing, trading, user
+src/api/routers/__init__.py:1: in <module>
+    from . import auth, pricing, trading, user
+src/api/routers/auth.py:12: in <module>
+    from src.api.deps import get_current_user
+src/api/deps.py:9: in <module>
+    from src.models.user import User, Session as UserSession
+E   ModuleNotFoundError: No module named 'src.models'
+________________ TestUserModels.test_user_create_invalid_email _________________
+tests/test_auth.py:35: in test_user_create_invalid_email
+    from src.api.main import UserCreate
+src/api/main.py:19: in <module>
+    from src.api.routers import auth, pricing, trading, user
+src/api/routers/__init__.py:1: in <module>
+    from . import auth, pricing, trading, user
+src/api/routers/auth.py:12: in <module>
+    from src.api.deps import get_current_user
+src/api/deps.py:9: in <module>
+    from src.models.user import User, Session as UserSession
+E   ModuleNotFoundError: No module named 'src.models'
+________________ TestUserModels.test_user_create_short_password ________________
+tests/test_auth.py:42: in test_user_create_short_password
+    from src.api.main import UserCreate
+src/api/main.py:19: in <module>
+    from src.api.routers import auth, pricing, trading, user
+src/api/routers/__init__.py:1: in <module>
+    from . import auth, pricing, trading, user
+src/api/routers/auth.py:12: in <module>
+    from src.api.deps import get_current_user
+src/api/deps.py:9: in <module>
+    from src.models.user import User, Session as UserSession
+E   ModuleNotFoundError: No module named 'src.models'
+_________________ TestUserModels.test_user_create_invalid_role _________________
+tests/test_auth.py:49: in test_user_create_invalid_role
+    from src.api.main import UserCreate
+src/api/main.py:19: in <module>
+    from src.api.routers import auth, pricing, trading, user
+src/api/routers/__init__.py:1: in <module>
+    from . import auth, pricing, trading, user
+src/api/routers/auth.py:12: in <module>
+    from src.api.deps import get_current_user
+src/api/deps.py:9: in <module>
+    from src.models.user import User, Session as UserSession
+E   ModuleNotFoundError: No module named 'src.models'
+_________________ TestPricingModels.test_pricing_request_valid _________________
+tests/test_auth.py:64: in test_pricing_request_valid
+    from src.api.main import PricingRequest
+src/api/main.py:19: in <module>
+    from src.api.routers import auth, pricing, trading, user
+src/api/routers/__init__.py:1: in <module>
+    from . import auth, pricing, trading, user
+src/api/routers/auth.py:12: in <module>
+    from src.api.deps import get_current_user
+src/api/deps.py:9: in <module>
+    from src.models.user import User, Session as UserSession
+E   ModuleNotFoundError: No module named 'src.models'
+_____________ TestPricingModels.test_pricing_request_invalid_spot ______________
+tests/test_auth.py:78: in test_pricing_request_invalid_spot
+    from src.api.main import PricingRequest
+src/api/main.py:19: in <module>
+    from src.api.routers import auth, pricing, trading, user
+src/api/routers/__init__.py:1: in <module>
+    from . import auth, pricing, trading, user
+src/api/routers/auth.py:12: in <module>
+    from src.api.deps import get_current_user
+src/api/deps.py:9: in <module>
+    from src.models.user import User, Session as UserSession
+E   ModuleNotFoundError: No module named 'src.models'
+__________ TestPricingModels.test_pricing_request_invalid_option_type __________
+tests/test_auth.py:92: in test_pricing_request_invalid_option_type
+    from src.api.main import PricingRequest
+src/api/main.py:19: in <module>
+    from src.api.routers import auth, pricing, trading, user
+src/api/routers/__init__.py:1: in <module>
+    from . import auth, pricing, trading, user
+src/api/routers/auth.py:12: in <module>
+    from src.api.deps import get_current_user
+src/api/deps.py:9: in <module>
+    from src.models.user import User, Session as UserSession
+E   ModuleNotFoundError: No module named 'src.models'
+____________________ TestUserModels.test_user_create_valid _____________________
+tests/test_auth.py:18: in test_user_create_valid
+    from src.api.main import UserCreate
 E   ImportError: cannot import name 'UserCreate' from 'src.api.main' (/app/src/api/main.py)
 _________________ TestUserModels.test_user_create_default_role _________________
 tests/test_auth.py:29: in test_user_create_default_role
@@ -93,6 +189,14 @@ src/pricing/numerical_methods.py:151: in crank_nicolson_price
     rhs[1:-1] = B_lower[1:-1] * V[1:-2] + B_diag[1:-1] * V[2:-1] + B_upper[1:-1] * V[3:-1]
                 ^^^^^^^^^^^^^^^^^^^^^^^
 E   ValueError: operands could not be broadcast together with shapes (196,) (198,)
+FAILED tests/test_auth.py::TestUserModels::test_user_create_valid - ModuleNotFoundError: No module named 'src.models'
+FAILED tests/test_auth.py::TestUserModels::test_user_create_default_role - ModuleNotFoundError: No module named 'src.models'
+FAILED tests/test_auth.py::TestUserModels::test_user_create_invalid_email - ModuleNotFoundError: No module named 'src.models'
+FAILED tests/test_auth.py::TestUserModels::test_user_create_short_password - ModuleNotFoundError: No module named 'src.models'
+FAILED tests/test_auth.py::TestUserModels::test_user_create_invalid_role - ModuleNotFoundError: No module named 'src.models'
+FAILED tests/test_auth.py::TestPricingModels::test_pricing_request_valid - ModuleNotFoundError: No module named 'src.models'
+FAILED tests/test_auth.py::TestPricingModels::test_pricing_request_invalid_spot - ModuleNotFoundError: No module named 'src.models'
+FAILED tests/test_auth.py::TestPricingModels::test_pricing_request_invalid_option_type - ModuleNotFoundError: No module named 'src.models'
 ../home/jules/.pyenv/versions/3.12.12/lib/python3.12/site-packages/passlib/utils/__init__.py:854
   /home/jules/.pyenv/versions/3.12.12/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
     from crypt import crypt as _crypt
@@ -111,6 +215,8 @@ FAILED tests/test_pricing.py::TestCrankNicolson::test_accuracy_vs_analytical_put
 FAILED tests/test_pricing.py::TestCrankNicolson::test_grid_convergence - ValueError: operands could not be broadcast together with shapes (46,) (48,)
 FAILED tests/test_pricing.py::TestNumericalMethodComparator::test_all_methods_return_results - ValueError: operands could not be broadcast together with shapes (96,) (98,)
 FAILED tests/test_pricing.py::TestNumericalMethodComparator::test_timing_information - ValueError: operands could not be broadcast together with shapes (196,) (198,)
+
+Tests finished with exit code 1
 
 Tests finished with exit code 1
 plugins: anyio-4.12.1

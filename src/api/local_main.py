@@ -34,8 +34,7 @@ try:
     from passlib.context import CryptContext
     from pydantic import BaseModel, EmailStr, Field
 except Exception as e:
-    with open("startup_error.log", "w") as f:
-        f.write(f"Import Error: {e}\n{traceback.format_exc()}")
+    sys.stderr.write(f"Import Error: {e}\n{traceback.format_exc()}")
     sys.exit(1)
 
 logger = structlog.get_logger()

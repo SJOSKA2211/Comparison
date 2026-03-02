@@ -1,4 +1,3 @@
-# pylint: disable=missing-module-docstring, broad-exception-caught
 import os
 import sys
 import traceback
@@ -11,7 +10,7 @@ modules = [
     "src.api.routers.trading",
     "src.pricing.numerical_methods",
     "src.models.market",
-    "src.ml.feature_engineering",
+    "src.ml.feature_engineering"
 ]
 
 for mod in modules:

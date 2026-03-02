@@ -1,4 +1,3 @@
-# pylint: disable=missing-module-docstring, unspecified-encoding
 import sys
 
 with open("diagnosis.txt", "w") as f:

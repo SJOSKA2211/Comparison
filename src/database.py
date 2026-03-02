@@ -1,10 +1,6 @@
 import os
 from typing import AsyncGenerator
 
-from dotenv import load_dotenv
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase
-
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -33,10 +29,8 @@ AsyncSessionLocal = async_sessionmaker(
     autoflush=False,
 )
 
-
 class Base(DeclarativeBase):
     pass
-
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:

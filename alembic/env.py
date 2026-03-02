@@ -1,4 +1,8 @@
 # ruff: noqa: E402
+from dotenv import load_dotenv
+
+load_dotenv()
+
 import asyncio
 from logging.config import fileConfig
 
@@ -9,13 +13,14 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 # Import your models here
-from src.database import DATABASE_URL, Base
+from src.database import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 # Overwrite the sqlalchemy.url in the config object with the one from our app settings
+from src.database import DATABASE_URL
 
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 

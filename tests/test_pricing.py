@@ -1,5 +1,3 @@
-# pylint: disable=duplicate-code
-# pylint: disable=duplicate-code
 """
 BS-Opt Test Suite
 Tests for pricing engine numerical methods
@@ -35,7 +33,6 @@ TOLERANCE_PCT = 1.0  # 1% max error
 # =============================================================================
 # Black-Scholes Analytical Tests
 # =============================================================================
-
 
 class TestBlackScholes:
     """Tests for analytical Black-Scholes pricing"""
@@ -93,33 +90,32 @@ class TestBlackScholes:
 # Finite Difference Method Tests
 # =============================================================================
 
-
 class TestCrankNicolson:
     """Tests for Crank-Nicolson FDM"""
 
     def test_accuracy_vs_analytical_call(self):
         """FDM should match analytical within tolerance"""
         analytical = black_scholes_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call")
-        fdm = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", asset_steps=200)
-        
+        fdm = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", M=200)
+
         error_pct = abs(fdm["price"] - analytical["price"]) / analytical["price"] * 100
         assert error_pct < TOLERANCE_PCT
 
     def test_accuracy_vs_analytical_put(self):
         """FDM put should match analytical"""
         analytical = black_scholes_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "put")
-        fdm = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "put", asset_steps=200)
-        
+        fdm = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "put", M=200)
+
         error_pct = abs(fdm["price"] - analytical["price"]) / analytical["price"] * 100
         assert error_pct < TOLERANCE_PCT
 
     def test_grid_convergence(self):
         """Finer grid should give more accurate result"""
         analytical = black_scholes_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call")
-        
-        coarse = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", asset_steps=50)
-        fine = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", asset_steps=200)
-        
+
+        coarse = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", M=50)
+        fine = crank_nicolson_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", M=200)
+
         coarse_error = abs(coarse["price"] - analytical["price"])
         fine_error = abs(fine["price"] - analytical["price"])
 
@@ -129,7 +125,6 @@ class TestCrankNicolson:
 # =============================================================================
 # Monte Carlo Tests
 # =============================================================================
-
 
 class TestMonteCarlo:
     """Tests for Monte Carlo pricing"""
@@ -164,15 +159,14 @@ class TestMonteCarlo:
 # Trinomial Tree Tests
 # =============================================================================
 
-
 class TestTrinomialTree:
     """Tests for trinomial tree pricing"""
 
     def test_accuracy_vs_analytical(self):
         """Tree should match analytical within tolerance"""
         analytical = black_scholes_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call")
-        tree = trinomial_tree_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", steps=200)
-        
+        tree = trinomial_tree_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call", N=200)
+
         error_pct = abs(tree["price"] - analytical["price"]) / analytical["price"] * 100
         assert error_pct < TOLERANCE_PCT
 
@@ -181,10 +175,10 @@ class TestTrinomialTree:
         analytical = black_scholes_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call")
 
         no_richardson = trinomial_tree_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call",
-                                             steps=100, use_richardson=False)
+                                             N=100, use_richardson=False)
         with_richardson = trinomial_tree_price(SPOT, STRIKE, RATE, VOLATILITY, TIME, "call",
-                                               steps=100, use_richardson=True)
-        
+                                               N=100, use_richardson=True)
+
         error_no = abs(no_richardson["price"] - analytical["price"])
         error_with = abs(with_richardson["price"] - analytical["price"])
 
@@ -196,7 +190,6 @@ class TestTrinomialTree:
 # =============================================================================
 # Comparative Analysis Tests
 # =============================================================================
-
 
 class TestNumericalMethodComparator:
     """Tests for the method comparator"""
@@ -234,7 +227,6 @@ class TestNumericalMethodComparator:
 # =============================================================================
 # Edge Cases
 # =============================================================================
-
 
 class TestEdgeCases:
     """Tests for edge cases and boundary conditions"""

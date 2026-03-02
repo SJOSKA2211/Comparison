@@ -1,4 +1,4 @@
-# pylint: disable=missing-module-docstring, broad-exception-caught, unused-import
+"""Trace import script."""
 import os
 import sys
 import traceback

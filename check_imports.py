@@ -1,4 +1,3 @@
-# pylint: disable=missing-module-docstring, broad-exception-caught, unspecified-encoding
 import os
 import sys
 
@@ -11,13 +10,13 @@ modules_to_check = [
     "src.api.routers.trading",
     "src.pricing.numerical_methods",
     "src.models.market",
-    "src.ml.feature_engineering",
+    "src.ml.feature_engineering"
 ]
 
 results = []
 for mod in modules_to_check:
     try:
-        __import__(mod, fromlist=["*"])
+        __import__(mod, fromlist=['*'])
         results.append(f"{mod}: OK")
     except Exception as e:
         results.append(f"{mod}: ERROR ({type(e).__name__}: {e})")

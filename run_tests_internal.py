@@ -1,4 +1,3 @@
-# pylint: disable=missing-module-docstring, import-error, unspecified-encoding
 import os
 import sys
 
